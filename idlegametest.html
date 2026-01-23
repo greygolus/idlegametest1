@@ -1,0 +1,3420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Idle Crafting Ascension</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1218;
+      --panel: #1a1f2b;
+      --panel-light: #22293a;
+      --text: #e6e9f2;
+      --muted: #9aa3b2;
+      --accent: #6dd6ff;
+      --accent-2: #8b7bff;
+      --success: #58d68d;
+      --danger: #ff7676;
+      --warning: #f8c471;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #1b2233 0%, #0c0f16 55%, #090b10 100%);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 20px;
+      background: linear-gradient(135deg, #1c2333 0%, #10141d 100%);
+      border-bottom: 1px solid #273046;
+    }
+
+    header h1 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: var(--panel);
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #242c3d;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-card span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .stat-card strong {
+      font-size: 18px;
+      margin-top: 4px;
+      display: block;
+    }
+
+    .breakdown {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-top: 6px;
+      white-space: pre-line;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 16px;
+      padding: 16px;
+      flex: 1;
+    }
+
+    nav {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border: 1px solid #242c3d;
+    }
+
+    nav button {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 8px;
+      text-align: left;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    nav button.active {
+      background: var(--panel-light);
+      border-color: #2c3750;
+      color: var(--accent);
+    }
+
+    nav button:hover {
+      border-color: #2c3750;
+    }
+
+    nav button.hidden {
+      display: none;
+    }
+
+    .panel {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid #242c3d;
+      margin-bottom: 16px;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: var(--accent-2);
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--panel-light);
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #2c3750;
+      flex: 1 1 240px;
+      min-width: 240px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      font-size: 16px;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #4d9fff, #6f7bff);
+      border: none;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 10px 20px rgba(79, 134, 255, 0.35);
+    }
+
+    button.ghost {
+      background: transparent;
+      border: 1px solid #2c3750;
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: #141926;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #26314a;
+    }
+
+    .progress {
+      height: 100%;
+      background: linear-gradient(90deg, #4ed6ff, #7e7bff);
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    select,
+    input[type="range"] {
+      width: 100%;
+      background: #131826;
+      border: 1px solid #273045;
+      color: var(--text);
+      padding: 6px;
+      border-radius: 6px;
+    }
+
+    .badge {
+      background: #273045;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--accent);
+      display: inline-block;
+    }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .subtext {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .buy-toggle {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 8px 0 12px;
+    }
+
+    .buy-toggle button {
+      background: #151a26;
+      border: 1px solid #2c3750;
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .buy-toggle button.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .stat-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .stat-list li {
+      padding: 4px 0;
+      border-bottom: 1px dashed #2b344a;
+    }
+
+    footer {
+      padding: 12px 20px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+      border-top: 1px solid #273046;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Idle Crafting Ascension</h1>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span>Points (P)</span>
+        <strong id="points">0</strong>
+      </div>
+      <div class="stat-card">
+        <span>Points per second (PPS)</span>
+        <strong id="pps">0</strong>
+      </div>
+      <div class="stat-card">
+        <span>Total Multiplier</span>
+        <strong id="multiplier">x1.00</strong>
+      </div>
+      <div class="stat-card">
+        <span>Essence (E1) / Cores (C2) / Prisms (P3) / Eclipses (E4) / Crowns (C5)</span>
+        <strong id="prestige-currencies">0 / 0 / 0 / 0 / 0</strong>
+      </div>
+      <div class="stat-card">
+        <span>PPS Breakdown</span>
+        <strong id="pps-breakdown-total">x1.00</strong>
+        <div id="pps-breakdown" class="breakdown"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav>
+      <button class="active" data-tab="crafting">Crafting</button>
+      <button data-tab="upgrades">Points Shop</button>
+      <button data-tab="machines" id="tab-button-machines">Tier 2 Machines</button>
+      <button data-tab="tier2-upgrades" id="tab-button-tier2-upgrades">Gear Shop</button>
+      <button data-tab="tier4" id="tab-button-tier4">Tier 4 Workshop</button>
+      <button data-tab="sanctum" id="tab-button-sanctum">Sanctum</button>
+      <button data-tab="constellation" id="tab-button-constellation">Constellation</button>
+      <button data-tab="research" id="tab-button-research">Research</button>
+      <button data-tab="automation" id="tab-button-automation">Automation</button>
+      <button data-tab="prestige">Prestige</button>
+      <button data-tab="stats">Statistics</button>
+      <button id="toggle-debug" class="ghost">Toggle Debug Panel</button>
+      <button id="reset-save" class="ghost" style="color: var(--danger)">Reset Save</button>
+    </nav>
+
+    <section>
+      <div id="tab-crafting" class="panel">
+        <h2>Crafting Slots</h2>
+        <p class="muted">Assign recipes to slots. Each slot crafts continuously and adds items to inventory.</p>
+        <div id="slots" class="grid-two"></div>
+        <div class="panel">
+          <h3>Recipe Unlocks</h3>
+          <p class="subtext">New crafting tiers unlock after prestiges. Each tier gives one base item and one multiplier item.</p>
+          <div id="recipe-unlock-list" class="grid-two"></div>
+        </div>
+      <div class="panel">
+        <h3>Inventory</h3>
+        <div id="inventory-list" class="grid-two"></div>
+      </div>
+      <div class="panel">
+        <h3>Crafting Insights</h3>
+        <p class="subtext">Highlights which recipes give the best PPS impact right now.</p>
+        <div id="crafting-insights" class="grid-two"></div>
+      </div>
+      </div>
+
+      <div id="tab-upgrades" class="panel hidden">
+        <h2>Points Shop</h2>
+        <p class="muted">Spend Points to improve your crafting infrastructure.</p>
+        <div class="buy-toggle" aria-label="Upgrade buy amount">
+          <button type="button" data-buy="1">1x</button>
+          <button type="button" data-buy="10">10x</button>
+          <button type="button" data-buy="100">100x</button>
+          <button type="button" data-buy="max">Max</button>
+        </div>
+        <div id="upgrade-list" class="grid-two"></div>
+      </div>
+
+      <div id="tab-machines" class="panel hidden">
+        <h2>Tier 2 Machines</h2>
+        <p class="muted">Unlocked after Prestige 1. Machines add flat PPS and generate Gears.</p>
+        <div class="buy-toggle" aria-label="Machine buy amount">
+          <button type="button" data-buy="1">1x</button>
+          <button type="button" data-buy="10">10x</button>
+          <button type="button" data-buy="100">100x</button>
+          <button type="button" data-buy="max">Max</button>
+        </div>
+        <div id="machine-list" class="grid-two"></div>
+        <div class="panel">
+          <h3>Gears</h3>
+          <p><span id="gears-count">0</span> G total</p>
+          <p class="subtext">Gears fuel Tier 2 upgrades.</p>
+        </div>
+      </div>
+
+      <div id="tab-tier2-upgrades" class="panel hidden">
+        <h2>Gear Shop</h2>
+        <p class="muted">These upgrades persist through Prestige 1 but reset on Prestige 2.</p>
+        <div class="buy-toggle" aria-label="Tier 2 upgrade buy amount">
+          <button type="button" data-buy="1">1x</button>
+          <button type="button" data-buy="10">10x</button>
+          <button type="button" data-buy="100">100x</button>
+          <button type="button" data-buy="max">Max</button>
+        </div>
+        <div id="tier2-upgrade-list" class="grid-two"></div>
+      </div>
+
+      <div id="tab-sanctum" class="panel hidden">
+        <h2>Sanctum (Tier 5)</h2>
+        <p class="muted">Unlocked after Prestige 4. Convert Points into Glyphs to power Sanctum upgrades.</p>
+        <div class="buy-toggle" aria-label="Sanctum upgrade buy amount">
+          <button type="button" data-buy="1">1x</button>
+          <button type="button" data-buy="10">10x</button>
+          <button type="button" data-buy="100">100x</button>
+          <button type="button" data-buy="max">Max</button>
+        </div>
+        <div class="card">
+          <h3>Glyphs</h3>
+          <p><span id="glyph-count">0</span> Glyphs stored</p>
+          <p class="subtext">Glyphs are earned from spending Points in Sanctum upgrades.</p>
+        </div>
+        <div id="sanctum-list" class="grid-two" style="margin-top: 12px;"></div>
+      </div>
+
+      <div id="tab-prestige" class="panel hidden">
+        <h2>Prestige</h2>
+        <div class="panel">
+          <h3>Prestige Dust</h3>
+          <p class="subtext">Passive dust is generated based on current prestige currencies and boosts future gains.</p>
+          <div class="row">
+            <div class="card">
+              <h3>Essence Dust</h3>
+              <p><span id="dust-essence">0</span> stored</p>
+            </div>
+            <div class="card">
+              <h3>Core Dust</h3>
+              <p><span id="dust-core">0</span> stored</p>
+            </div>
+            <div class="card">
+              <h3>Prism Dust</h3>
+              <p><span id="dust-prism">0</span> stored</p>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="card">
+            <h3>Prestige 1: Essence</h3>
+            <p class="subtext">Requirement: 40 Relics or 150,000 total Points earned.</p>
+            <p class="subtext">Gain: floor((points/50,000)^0.75) + floor(relics/20)</p>
+            <button id="prestige1" class="primary">Prestige 1</button>
+            <p id="prestige1-gain" class="subtext"></p>
+          </div>
+          <div class="card">
+            <h3>Prestige 2: Cores</h3>
+            <p class="subtext">Requirement: 200 total Gears, 30 Press Machines, or 5,000,000 total Points.</p>
+            <p class="subtext">Gain: floor((gears/250)^0.85) + floor(essence/40)</p>
+            <button id="prestige2" class="primary">Prestige 2</button>
+            <p id="prestige2-gain" class="subtext"></p>
+          </div>
+          <div class="card">
+            <h3>Prestige 3: Prisms</h3>
+            <p class="subtext">Requirement: 15,000 Data or 25,000,000 total Points.</p>
+            <p class="subtext">Gain: floor((data/5,000)^0.8) + floor(cores/20)</p>
+            <button id="prestige3" class="primary">Prestige 3</button>
+            <p id="prestige3-gain" class="subtext"></p>
+          </div>
+          <div class="card">
+            <h3>Prestige 4: Eclipses</h3>
+            <p class="subtext">Requirement: 120 Prisms or 150,000,000 total Points.</p>
+            <p class="subtext">Gain: floor((prisms/40)^0.85) + floor(cores/50)</p>
+            <button id="prestige4" class="primary">Prestige 4</button>
+            <p id="prestige4-gain" class="subtext"></p>
+          </div>
+          <div class="card">
+            <h3>Prestige 5: Crowns</h3>
+            <p class="subtext">Requirement: 60 Eclipses or 750,000,000 total Points.</p>
+            <p class="subtext">Gain: floor((eclipses/20)^0.9) + floor(prisms/80)</p>
+            <button id="prestige5" class="primary">Prestige 5</button>
+            <p id="prestige5-gain" class="subtext"></p>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-research" class="panel hidden">
+        <h2>Research Tree (Tier 3)</h2>
+        <p class="muted">Convert a portion of PPS into Data to fund permanent research nodes.</p>
+        <div class="card">
+          <h3>Data Conversion</h3>
+          <p><span id="data-count">0</span> Data stored</p>
+          <label for="data-slider">PPS to Data: <span id="data-slider-value">0%</span></label>
+          <input type="range" id="data-slider" min="0" max="90" step="5" value="0" />
+        </div>
+        <div id="research-list" class="grid-two" style="margin-top: 12px;"></div>
+      </div>
+
+      <div id="tab-tier4" class="panel hidden">
+        <h2>Tier 4 Workshop</h2>
+        <p class="muted">Unlocked after Prestige 3. Invest Points into Tier 4-focused boosts.</p>
+        <div class="buy-toggle" aria-label="Tier 4 upgrade buy amount">
+          <button type="button" data-buy="1">1x</button>
+          <button type="button" data-buy="10">10x</button>
+          <button type="button" data-buy="100">100x</button>
+          <button type="button" data-buy="max">Max</button>
+        </div>
+        <div id="tier4-upgrade-list" class="grid-two"></div>
+      </div>
+
+      <div id="tab-automation" class="panel hidden">
+        <h2>Automation Hub</h2>
+        <p class="muted">Unlocked after Prestige 2. Spend prestige resources to automate lower tiers.</p>
+        <div class="buy-toggle" aria-label="Automation buy amount">
+          <button type="button" data-buy="1">1x</button>
+          <button type="button" data-buy="10">10x</button>
+          <button type="button" data-buy="100">100x</button>
+          <button type="button" data-buy="max">Max</button>
+        </div>
+        <h3>Automation Upgrades</h3>
+        <div id="automation-upgrade-list" class="grid-two"></div>
+        <h3 style="margin-top: 16px;">Prestige Generators</h3>
+        <p class="subtext">Generate prestige currencies each second based on your current reset gains.</p>
+        <div id="automation-generator-list" class="grid-two"></div>
+      </div>
+
+      <div id="tab-constellation" class="panel hidden">
+        <h2>Constellation (Tier 6)</h2>
+        <p class="muted">Unlocked after Prestige 5. Spend Stars to unlock constellation boons.</p>
+        <div class="buy-toggle" aria-label="Constellation buy amount">
+          <button type="button" data-buy="1">1x</button>
+          <button type="button" data-buy="10">10x</button>
+          <button type="button" data-buy="100">100x</button>
+          <button type="button" data-buy="max">Max</button>
+        </div>
+        <div class="card">
+          <h3>Stars</h3>
+          <p><span id="star-count">0</span> Stars stored</p>
+          <p class="subtext">Stars are earned from converting Data at high tiers.</p>
+        </div>
+        <div id="constellation-list" class="grid-two" style="margin-top: 12px;"></div>
+      </div>
+
+      <div id="tab-stats" class="panel hidden">
+        <h2>Statistics</h2>
+        <ul class="stat-list" id="stats-list"></ul>
+      </div>
+
+      <div id="debug-panel" class="panel hidden">
+        <h2>Debug Panel</h2>
+        <pre id="debug-output" class="muted"></pre>
+        <button id="debug-boost" class="ghost" style="margin-top: 12px;">Grant Late-Game Test Save</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Idle Crafting Ascension &mdash; Save every 10 seconds. Offline progress capped.
+  </footer>
+
+  <script>
+    const CONSTANTS = {
+      tickRate: 20,
+      offlineCapSeconds: 8 * 60 * 60,
+      baseItems: {
+        shard: { name: "Shard", time: 2, basePPS: 0.25, tier: 1, type: "base" },
+        ingot: { name: "Ingot", time: 8, bonus: 0.024, tier: 1, type: "mult" },
+        relic: { name: "Relic", time: 30, basePPS: 1.5, tier: 2, type: "base" },
+        rune: { name: "Rune", time: 45, bonus: 0.048, tier: 2, type: "mult" },
+        sigil: { name: "Sigil", time: 60, basePPS: 8, tier: 3, type: "base" },
+        core: { name: "Core", time: 90, bonus: 0.08, tier: 3, type: "mult" },
+        aether: { name: "Aether", time: 120, basePPS: 40, tier: 4, type: "base" },
+        myth: { name: "Myth", time: 150, bonus: 0.112, tier: 4, type: "mult" },
+        nova: { name: "Nova", time: 180, basePPS: 200, tier: 5, type: "base" },
+        flux: { name: "Flux", time: 220, bonus: 0.144, tier: 5, type: "mult" },
+        void: { name: "Void", time: 260, basePPS: 1000, tier: 6, type: "base" },
+        echo: { name: "Echo", time: 320, bonus: 0.176, tier: 6, type: "mult" }
+      },
+      craftTimeFloor: 0.1,
+      upgrades: {
+        slot: { baseCost: 50, scale: 4, max: 6 },
+        speed: { baseCost: 25, scale: 2.2, effect: 0.95 },
+        shardEff: { baseCost: 30, scale: 2.5, effect: 1.12 },
+        ingotPot: { baseCost: 200, scale: 2.8, base: 0.024, max: 0.04 },
+        relicPot: { baseCost: 600, scale: 3.0, base: 0.064, max: 0.096 }
+      },
+      recipeUnlocks: {
+        tiers: [
+          { tier: 1, name: "Tier 1", unlock: "Available at start." },
+          { tier: 2, name: "Tier 2", unlock: "Unlocked after Prestige 1." },
+          { tier: 3, name: "Tier 3", unlock: "Unlocked after Prestige 2." },
+          { tier: 4, name: "Tier 4", unlock: "Unlocked after Prestige 3." },
+          { tier: 5, name: "Tier 5", unlock: "Unlocked after Prestige 4." },
+          { tier: 6, name: "Tier 6", unlock: "Unlocked after Prestige 5." }
+        ]
+      },
+      prestige1: {
+        relics: 40,
+        totalPoints: 150000,
+        essenceFormulaPoints: 50000,
+        essenceExponent: 0.75,
+        relicsPerEssence: 20,
+        essenceMult: 0.096
+      },
+      prestige2: {
+        totalGears: 200,
+        pressMachines: 30,
+        totalPoints: 5000000,
+        coresFormulaGears: 250,
+        coresExponent: 0.85,
+        essencePerCore: 40
+      },
+      prestige3: {
+        totalData: 15000,
+        totalPoints: 25000000,
+        prismsFormulaData: 5000,
+        prismsExponent: 0.8,
+        coresPerPrism: 20,
+        prismMult: 0.12
+      },
+      prestige4: {
+        totalPrisms: 120,
+        totalPoints: 150000000,
+        eclipsesFormulaPrisms: 40,
+        eclipsesExponent: 0.85,
+        coresPerEclipse: 50,
+        eclipseMult: 0.144
+      },
+      prestige5: {
+        totalEclipses: 60,
+        totalPoints: 750000000,
+        crownsFormulaEclipses: 20,
+        crownsExponent: 0.9,
+        prismsPerCrown: 80,
+        crownMult: 0.176
+      },
+      dust: {
+        essenceRate: 0.0005,
+        coreRate: 0.0003,
+        prismRate: 0.0002
+      },
+      machines: {
+        crank: { name: "Crank Machine", cost: 5000, pps: 20, gps: 0.2, scale: 1.35, essenceReq: 0 },
+        press: { name: "Press Machine", cost: 50000, pps: 300, gps: 1.0, scale: 1.45, essenceReq: 10 },
+        foundry: { name: "Foundry Machine", cost: 250000, pps: 1500, gps: 3.0, scale: 1.55, essenceReq: 25 }
+      },
+      tier2Upgrades: {
+        overclock: { name: "Crafting Overclock", desc: "Craft time -6% per level (cap applies).", cost: 15, scale: 2.5, effect: 0.94, max: 10 },
+        amplifier: { name: "Multiplier Amplifier", desc: "All item multipliers +5% per level.", cost: 25, scale: 2.8, effect: 0.04, max: 15 },
+        slotAutomation: { name: "Slot Automation", desc: "Start with +1 crafting slot per level after Prestige 1.", cost: 60, scale: 3.2, max: 5 },
+        jumpstart: { name: "Recipe Jumpstart", desc: "Start with Ingot recipe unlocked after Prestige 1.", cost: 80, scale: 3.4, max: 3 },
+        tierBoost: { name: "Tier Bridge", desc: "Tier 2+ base items gain +6% PPS per level.", cost: 150, scale: 3.1, effect: 0.06, max: 8 }
+      },
+      tier4Upgrades: {
+        aetherBoost: { name: "Aether Infusion", desc: "Tier 4 base PPS +12% per level.", cost: 2000000, scale: 2.4, effect: 0.12, max: 10 },
+        mythBoost: { name: "Mythic Resonance", desc: "Tier 4 multiplier bonus +6% per level.", cost: 3500000, scale: 2.6, effect: 0.06, max: 10 }
+      },
+      sanctum: {
+        upgrades: {
+          glyphFocus: { name: "Glyph Focus", desc: "Sanctum multiplier +10% per level.", cost: 5000000, scale: 2.6, effect: 0.08, max: 12 },
+          relicForge: { name: "Relic Forge", desc: "Tier 4+ base PPS +8% per level.", cost: 12000000, scale: 2.8, effect: 0.08, max: 10 },
+          timeSeals: { name: "Time Seals", desc: "Craft time -3% per level (additive).", cost: 8000000, scale: 2.7, effect: 0.03, max: 10 }
+        }
+      },
+      constellations: {
+        nodes: [
+          { id: "star-1", name: "North Star", cost: 50, effect: { starMult: 1.096 }, desc: "All multipliers +12% per level.", max: 8 },
+          { id: "star-2", name: "Celestial Forge", cost: 80, effect: { baseBoost: 1.08 }, desc: "All base PPS +8% per level.", max: 10 },
+          { id: "star-3", name: "Deep Orbit", cost: 120, effect: { machinePPS: 1.15 }, desc: "Machine PPS +15% per level.", max: 6 }
+        ]
+      },
+      research: {
+        nodes: [
+          { id: "craft-1", name: "Extra Slot", branch: "Crafting", cost: 20, costScale: 2.2, maxLevel: 3, essenceReq: 0, coreReq: 0, effect: { slots: 1 }, desc: "+1 permanent slot per level." },
+          { id: "craft-2", name: "Rapid Tools", branch: "Crafting", cost: 45, costScale: 2.4, maxLevel: 4, essenceReq: 5, coreReq: 0, effect: { speedMult: 0.96 }, desc: "Craft times -4% per level." },
+          { id: "craft-3", name: "Shard Boost", branch: "Crafting", cost: 70, costScale: 2.3, maxLevel: 4, essenceReq: 8, coreReq: 1, effect: { shardMult: 1.15 }, desc: "Shard PPS +15% per level." },
+          { id: "craft-4", name: "Forge Optimization", branch: "Crafting", cost: 120, costScale: 2.5, maxLevel: 3, essenceReq: 12, coreReq: 2, effect: { ingotBonus: 0.01 }, desc: "+1% per ingot per level." },
+          { id: "machine-1", name: "Enhanced Gears", branch: "Machines", cost: 30, costScale: 2.2, maxLevel: 4, essenceReq: 6, coreReq: 0, effect: { gearMult: 1.1 }, desc: "Gear output +10% per level." },
+          { id: "machine-2", name: "Turbo Belts", branch: "Machines", cost: 55, costScale: 2.4, maxLevel: 4, essenceReq: 10, coreReq: 1, effect: { machinePPS: 1.1 }, desc: "Machine PPS +10% per level." },
+          { id: "machine-3", name: "Overpress", branch: "Machines", cost: 90, costScale: 2.6, maxLevel: 3, essenceReq: 14, coreReq: 2, effect: { pressBoost: 1.2 }, desc: "Press Machine PPS +20% per level." },
+          { id: "machine-4", name: "Foundry Focus", branch: "Machines", cost: 140, costScale: 2.7, maxLevel: 3, essenceReq: 18, coreReq: 3, effect: { foundryBoost: 1.25 }, desc: "Foundry PPS +25% per level." },
+          { id: "meta-1", name: "Essence Echo", branch: "Meta", cost: 25, costScale: 2.1, maxLevel: 5, essenceReq: 4, coreReq: 0, effect: { essenceBoost: 1.1 }, desc: "Essence gain +10% per level." },
+          { id: "meta-2", name: "Core Catalyst", branch: "Meta", cost: 60, costScale: 2.3, maxLevel: 4, essenceReq: 10, coreReq: 1, effect: { coreBoost: 1.1 }, desc: "Core gain +10% per level." },
+          { id: "meta-3", name: "Offline Buffer", branch: "Meta", cost: 100, costScale: 2.4, maxLevel: 3, essenceReq: 12, coreReq: 2, effect: { offlineCap: 2 * 60 * 60 }, desc: "+2h offline cap per level." },
+          { id: "meta-4", name: "Launch Boost", branch: "Meta", cost: 130, costScale: 2.6, maxLevel: 3, essenceReq: 16, coreReq: 3, effect: { startingPoints: 2500 }, desc: "Start with +2,500 Points per level." },
+          { id: "meta-5", name: "Prism Resonance", branch: "Meta", cost: 200, costScale: 2.5, maxLevel: 4, essenceReq: 20, coreReq: 4, prismReq: 5, effect: { multBoost: 1.04 }, desc: "All tier multipliers +5% per level." },
+          { id: "meta-6", name: "Ascendant Base", branch: "Meta", cost: 260, costScale: 2.6, maxLevel: 4, essenceReq: 24, coreReq: 5, prismReq: 8, effect: { baseBoost: 1.06 }, desc: "All base PPS +6% per level." },
+          { id: "meta-7", name: "Dust Harvest", branch: "Meta", cost: 320, costScale: 2.7, maxLevel: 5, essenceReq: 30, coreReq: 6, prismReq: 10, effect: { dustBoost: 1.2 }, desc: "Prestige dust generation +20% per level." },
+          { id: "meta-8", name: "Echoed Gains", branch: "Meta", cost: 420, costScale: 2.9, maxLevel: 4, essenceReq: 34, coreReq: 8, prismReq: 12, effect: { essenceBoost: 1.05, coreBoost: 1.05 }, desc: "Essence/Core gains +5% per level." },
+          { id: "meta-9", name: "Eclipse Lattice", branch: "Meta", cost: 520, costScale: 3.1, maxLevel: 3, essenceReq: 40, coreReq: 10, prismReq: 14, eclipseReq: 2, effect: { sanctumBoost: 1.08 }, desc: "Sanctum multiplier +8% per level." },
+          { id: "meta-10", name: "Crown Harmonics", branch: "Meta", cost: 700, costScale: 3.3, maxLevel: 3, essenceReq: 48, coreReq: 12, prismReq: 16, eclipseReq: 4, crownReq: 1, effect: { starGain: 1.15 }, desc: "Star gain +15% per level." }
+        ]
+      },
+      automationUpgrades: {
+        t1Upgrader: {
+          name: "Points Auto Upgrader",
+          desc: "Automatically buys the cheapest Points Shop upgrade.",
+          currency: "essence",
+          baseCost: 8,
+          scale: 2.2,
+          max: 3,
+          intervals: [10000, 2000, 0],
+          unlockPrestige: 2
+        },
+        t1Slotter: {
+          name: "Auto Slot Manager",
+          desc: "Automatically assigns slots to the best PPS recipe.",
+          currency: "essence",
+          baseCost: 12,
+          scale: 2.4,
+          max: 1,
+          unlockPrestige: 2
+        },
+        t2Upgrader: {
+          name: "Gear Auto Upgrader",
+          desc: "Automatically buys the cheapest Gear Shop upgrade.",
+          currency: "cores",
+          baseCost: 6,
+          scale: 2.3,
+          max: 3,
+          intervals: [10000, 2000, 0],
+          unlockPrestige: 3
+        },
+        t3Upgrader: {
+          name: "Research Auto Upgrader",
+          desc: "Automatically buys the cheapest affordable Research node.",
+          currency: "prisms",
+          baseCost: 5,
+          scale: 2.5,
+          max: 3,
+          intervals: [10000, 2000, 0],
+          unlockPrestige: 4
+        },
+        t4Upgrader: {
+          name: "Tier 4 Auto Upgrader",
+          desc: "Automatically buys the cheapest Tier 4 Workshop upgrade.",
+          currency: "eclipses",
+          baseCost: 4,
+          scale: 2.6,
+          max: 3,
+          intervals: [10000, 2000, 0],
+          unlockPrestige: 5
+        },
+        t5Upgrader: {
+          name: "Sanctum Auto Upgrader",
+          desc: "Automatically buys the cheapest Sanctum upgrade.",
+          currency: "crowns",
+          baseCost: 3,
+          scale: 2.7,
+          max: 3,
+          intervals: [10000, 2000, 0],
+          unlockPrestige: 5
+        },
+        t6Upgrader: {
+          name: "Constellation Auto Upgrader",
+          desc: "Automatically buys the cheapest Constellation node.",
+          currency: "crowns",
+          baseCost: 3,
+          scale: 2.8,
+          max: 3,
+          intervals: [10000, 2000, 0],
+          unlockPrestige: 5
+        }
+      },
+      prestigeGenerators: {
+        essence: { name: "Essence Generator", currency: "prisms", baseCost: 3, scale: 2.4, max: 10, unlockPrestige: 3 },
+        cores: { name: "Core Generator", currency: "eclipses", baseCost: 2, scale: 2.5, max: 10, unlockPrestige: 4 },
+        prisms: { name: "Prism Generator", currency: "crowns", baseCost: 2, scale: 2.6, max: 10, unlockPrestige: 5 },
+        eclipses: { name: "Eclipse Generator", currency: "crowns", baseCost: 3, scale: 2.7, max: 10, unlockPrestige: 5 },
+        crowns: { name: "Crown Generator", currency: "crowns", baseCost: 4, scale: 2.8, max: 10, unlockPrestige: 5 }
+      }
+    };
+
+    const defaultState = () => ({
+      points: 0,
+      totalPoints: 0,
+      lifetimePoints: 0,
+      totalGears: 0,
+      pointsThisRun: 0,
+      timeThisRun: 0,
+      totalData: 0,
+      lastSave: Date.now(),
+      lastPPS: 0,
+      essence: 0,
+      cores: 0,
+      prisms: 0,
+      eclipses: 0,
+      crowns: 0,
+      dust: { essence: 0, core: 0, prism: 0 },
+      prestige1Count: 0,
+      prestige2Count: 0,
+      prestige3Count: 0,
+      prestige4Count: 0,
+      prestige5Count: 0,
+      unlockedTier: 1,
+      items: {
+        shard: 0,
+        ingot: 0,
+        relic: 0,
+        rune: 0,
+        sigil: 0,
+        core: 0,
+        aether: 0,
+        myth: 0,
+        nova: 0,
+        flux: 0,
+        void: 0,
+        echo: 0
+      },
+      recipes: {},
+      slots: [],
+      slotCount: 1,
+      upgrades: {
+        slotsPurchased: 0,
+        speedLevel: 0,
+        shardEffLevel: 0,
+        ingotPotLevel: 0,
+        relicPotLevel: 0,
+        baseBoostLevel: 0,
+        multBoostLevel: 0
+      },
+      tier2: {
+        machines: { crank: 0, press: 0, foundry: 0 },
+        gears: 0,
+        upgrades: {
+          overclock: 0,
+          amplifier: 0,
+          slotAutomation: 0,
+          jumpstart: 0,
+          tierBoost: 0
+        }
+      },
+      tier4: {
+        upgrades: {
+          aetherBoost: 0,
+          mythBoost: 0
+        }
+      },
+      research: {
+        data: 0,
+        slider: 0,
+        purchased: {},
+        levels: {}
+      },
+      automation: {
+        t1UpgraderLevel: 0,
+        t1UpgraderEnabled: false,
+        t1SlotterLevel: 0,
+        t1SlotterEnabled: false,
+        t2UpgraderLevel: 0,
+        t2UpgraderEnabled: false,
+        t3UpgraderLevel: 0,
+        t3UpgraderEnabled: false,
+        t4UpgraderLevel: 0,
+        t4UpgraderEnabled: false,
+        t5UpgraderLevel: 0,
+        t5UpgraderEnabled: false,
+        t6UpgraderLevel: 0,
+        t6UpgraderEnabled: false,
+        generators: {
+          essence: 0,
+          cores: 0,
+          prisms: 0,
+          eclipses: 0,
+          crowns: 0
+        },
+        lastAuto: {
+          t1: 0,
+          t1Slot: 0,
+          t2: 0,
+          t3: 0,
+          t4: 0,
+          t5: 0,
+          t6: 0
+        }
+      },
+      sanctum: {
+        glyphs: 0,
+        upgrades: { glyphFocus: 0, relicForge: 0, timeSeals: 0 }
+      },
+      constellations: {
+        stars: 0,
+        nodes: { "star-1": 0, "star-2": 0, "star-3": 0 }
+      },
+      stats: {
+        bestPrestige1Time: null,
+        bestPrestige2Time: null
+      },
+      buyMode: "1"
+    });
+
+    let state = defaultState();
+    let needsSlotRender = true;
+    let needsUpgradeRender = true;
+    let needsMachineRender = true;
+    let needsTier2UpgradeRender = true;
+    let needsResearchRender = true;
+    let needsTier4UpgradeRender = true;
+    let needsSanctumRender = true;
+    let needsConstellationRender = true;
+    let needsAutomationRender = true;
+
+    const elements = {
+      points: document.getElementById("points"),
+      pps: document.getElementById("pps"),
+      multiplier: document.getElementById("multiplier"),
+      prestigeCurrencies: document.getElementById("prestige-currencies"),
+      slots: document.getElementById("slots"),
+      recipeUnlockList: document.getElementById("recipe-unlock-list"),
+      inventoryList: document.getElementById("inventory-list"),
+      upgradeList: document.getElementById("upgrade-list"),
+      machineList: document.getElementById("machine-list"),
+      gearsCount: document.getElementById("gears-count"),
+      tier2UpgradeList: document.getElementById("tier2-upgrade-list"),
+      sanctumList: document.getElementById("sanctum-list"),
+      glyphCount: document.getElementById("glyph-count"),
+      craftingInsights: document.getElementById("crafting-insights"),
+      dustEssence: document.getElementById("dust-essence"),
+      dustCore: document.getElementById("dust-core"),
+      dustPrism: document.getElementById("dust-prism"),
+      prestige1: document.getElementById("prestige1"),
+      prestige2: document.getElementById("prestige2"),
+      prestige3: document.getElementById("prestige3"),
+      prestige4: document.getElementById("prestige4"),
+      prestige5: document.getElementById("prestige5"),
+      prestige1Gain: document.getElementById("prestige1-gain"),
+      prestige2Gain: document.getElementById("prestige2-gain"),
+      prestige3Gain: document.getElementById("prestige3-gain"),
+      prestige4Gain: document.getElementById("prestige4-gain"),
+      prestige5Gain: document.getElementById("prestige5-gain"),
+      dataCount: document.getElementById("data-count"),
+      dataSlider: document.getElementById("data-slider"),
+      dataSliderValue: document.getElementById("data-slider-value"),
+      researchList: document.getElementById("research-list"),
+      tier4UpgradeList: document.getElementById("tier4-upgrade-list"),
+      automationUpgradeList: document.getElementById("automation-upgrade-list"),
+      automationGeneratorList: document.getElementById("automation-generator-list"),
+      constellationList: document.getElementById("constellation-list"),
+      starCount: document.getElementById("star-count"),
+      statsList: document.getElementById("stats-list"),
+      tabMachines: document.getElementById("tab-button-machines"),
+      tabTier2Upgrades: document.getElementById("tab-button-tier2-upgrades"),
+      tabResearch: document.getElementById("tab-button-research"),
+      tabTier4: document.getElementById("tab-button-tier4"),
+      tabAutomation: document.getElementById("tab-button-automation"),
+      tabSanctum: document.getElementById("tab-button-sanctum"),
+      tabConstellation: document.getElementById("tab-button-constellation"),
+      debugPanel: document.getElementById("debug-panel"),
+      debugOutput: document.getElementById("debug-output")
+    };
+
+    const format = (value) => {
+      if (!Number.isFinite(value)) return "0";
+      const sign = value < 0 ? "-" : "";
+      const absValue = Math.abs(value);
+      if (absValue < 1000) {
+        return `${sign}${absValue.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+      }
+      const units = ["K", "M", "B", "T", "Qa", "Qi"];
+      const sciThreshold = 1000 ** (units.length + 1);
+      if (absValue >= sciThreshold) {
+        return `${sign}${absValue.toExponential(2).replace("e+", "e")}`;
+      }
+      let unitIndex = 0;
+      let num = absValue / 1000;
+      while (num >= 1000 && unitIndex < units.length - 1) {
+        num /= 1000;
+        unitIndex += 1;
+      }
+      const trimmed = num.toFixed(2).replace(/\.00$/, "").replace(/(\.\d)0$/, "$1");
+      return `${sign}${trimmed}${units[unitIndex]}`;
+    };
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+    const sanitizeNumber = (value, fallback = 0) => (Number.isFinite(value) ? value : fallback);
+
+    const getCurrencyAmount = (currency) => {
+      if (currency === "essence") return state.essence;
+      if (currency === "cores") return state.cores;
+      if (currency === "prisms") return state.prisms;
+      if (currency === "eclipses") return state.eclipses;
+      if (currency === "crowns") return state.crowns;
+      if (currency === "stars") return state.constellations.stars;
+      return 0;
+    };
+
+    const spendCurrency = (currency, amount) => {
+      if (currency === "essence") state.essence = Math.max(0, state.essence - amount);
+      if (currency === "cores") state.cores = Math.max(0, state.cores - amount);
+      if (currency === "prisms") state.prisms = Math.max(0, state.prisms - amount);
+      if (currency === "eclipses") state.eclipses = Math.max(0, state.eclipses - amount);
+      if (currency === "crowns") state.crowns = Math.max(0, state.crowns - amount);
+      if (currency === "stars") state.constellations.stars = Math.max(0, state.constellations.stars - amount);
+    };
+
+    const totalCostForLevels = (baseCost, scale, startLevel, count) => {
+      const safeBase = Number.isFinite(baseCost) ? baseCost : 0;
+      const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
+      const safeStart = Number.isFinite(startLevel) ? startLevel : 0;
+      const safeCount = Number.isFinite(count) ? count : 0;
+      if (safeCount <= 0) return 0;
+      if (safeScale === 1) return safeBase * safeCount;
+      return safeBase * Math.pow(safeScale, safeStart) * (Math.pow(safeScale, safeCount) - 1) / (safeScale - 1);
+    };
+
+    const maxAffordableLevels = (currency, baseCost, scale, startLevel, maxLevel = Infinity) => {
+      const safeCurrency = Number.isFinite(currency) ? currency : 0;
+      const safeBase = Number.isFinite(baseCost) ? baseCost : 0;
+      const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
+      const safeStart = Number.isFinite(startLevel) ? startLevel : 0;
+      const safeMax = Number.isFinite(maxLevel) ? maxLevel : Infinity;
+      const startingCost = safeBase * Math.pow(safeScale, safeStart);
+      if (safeCurrency < startingCost) return 0;
+      let maxByFunds = 0;
+      if (safeScale === 1) {
+        maxByFunds = Math.floor(safeCurrency / startingCost);
+      } else {
+        const ratio = safeCurrency * (safeScale - 1) / startingCost + 1;
+        maxByFunds = Math.floor(Math.log(ratio) / Math.log(safeScale));
+      }
+      const remaining = Number.isFinite(safeMax) ? Math.max(0, safeMax - safeStart) : maxByFunds;
+      return Math.max(0, Math.min(maxByFunds, remaining));
+    };
+
+    const getTier1UpgradeConfig = (id) => {
+      if (id === "slot") {
+        return {
+          level: state.upgrades.slotsPurchased,
+          setLevel: (value) => {
+            state.upgrades.slotsPurchased = value;
+          },
+          baseCost: CONSTANTS.upgrades.slot.baseCost,
+          scale: CONSTANTS.upgrades.slot.scale,
+          max: CONSTANTS.upgrades.slot.max - 1
+        };
+      }
+      if (id === "speed") {
+        return {
+          level: state.upgrades.speedLevel,
+          setLevel: (value) => {
+            state.upgrades.speedLevel = value;
+          },
+          baseCost: CONSTANTS.upgrades.speed.baseCost,
+          scale: CONSTANTS.upgrades.speed.scale
+        };
+      }
+      if (id === "shardEff") {
+        return {
+          level: state.upgrades.shardEffLevel,
+          setLevel: (value) => {
+            state.upgrades.shardEffLevel = value;
+          },
+          baseCost: CONSTANTS.upgrades.shardEff.baseCost,
+          scale: CONSTANTS.upgrades.shardEff.scale
+        };
+      }
+      if (id === "ingotPot") {
+        return {
+          level: state.upgrades.ingotPotLevel,
+          setLevel: (value) => {
+            state.upgrades.ingotPotLevel = value;
+          },
+          baseCost: CONSTANTS.upgrades.ingotPot.baseCost,
+          scale: CONSTANTS.upgrades.ingotPot.scale
+        };
+      }
+      if (id === "relicPot") {
+        return {
+          level: state.upgrades.relicPotLevel,
+          setLevel: (value) => {
+            state.upgrades.relicPotLevel = value;
+          },
+          baseCost: CONSTANTS.upgrades.relicPot.baseCost,
+          scale: CONSTANTS.upgrades.relicPot.scale
+        };
+      }
+      if (id === "baseBoost") {
+        return {
+          level: state.upgrades.baseBoostLevel,
+          setLevel: (value) => {
+            state.upgrades.baseBoostLevel = value;
+          },
+          baseCost: 250,
+          scale: 2.4
+        };
+      }
+      if (id === "multBoost") {
+        return {
+          level: state.upgrades.multBoostLevel,
+          setLevel: (value) => {
+            state.upgrades.multBoostLevel = value;
+          },
+          baseCost: 400,
+          scale: 2.6
+        };
+      }
+      return null;
+    };
+
+    const getUpgradePurchaseCount = ({ currency, baseCost, scale, level, max }, mode = state.buyMode) => {
+      const affordable = maxAffordableLevels(currency, baseCost, scale, level, max);
+      const normalizedMode = ["1", "10", "100", "max"].includes(String(mode)) ? String(mode) : "1";
+      if (normalizedMode === "max") return affordable;
+      const desired = Number.parseInt(normalizedMode, 10);
+      if (Number.isNaN(desired)) return Math.min(1, affordable);
+      return Math.min(desired, affordable);
+    };
+
+    const updateBuyToggleUI = () => {
+      document.querySelectorAll(".buy-toggle button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.buy === state.buyMode);
+      });
+    };
+
+    const initSlots = () => {
+      if (state.slots.length === 0) {
+        const slotLimit = getSlotLimit();
+        for (let i = 0; i < slotLimit; i += 1) {
+          state.slots.push({ recipe: "shard", progress: 0 });
+        }
+        needsSlotRender = true;
+      }
+    };
+
+    const getSpeedMult = () => {
+      const level = state.upgrades.speedLevel;
+      let mult = 1;
+      for (let i = 0; i < level; i += 1) {
+        mult *= 1 - 0.05 * Math.pow(0.9, i);
+      }
+      return Math.max(CONSTANTS.craftTimeFloor, mult);
+    };
+
+    const addSlot = () => {
+      state.slots.push({ recipe: "shard", progress: 0 });
+      state.slotCount = state.slots.length;
+      needsSlotRender = true;
+    };
+
+    const getCraftTime = (recipe) => {
+      const base = CONSTANTS.baseItems[recipe].time;
+      const speedMult = getSpeedMult();
+      const overclock = Math.pow(CONSTANTS.tier2Upgrades.overclock.effect, state.tier2.upgrades.overclock);
+      const timeSeals = 1 - CONSTANTS.sanctum.upgrades.timeSeals.effect * state.sanctum.upgrades.timeSeals;
+      const researchMult = getResearchEffect("speedMult", 1);
+      const totalMult = Math.max(CONSTANTS.craftTimeFloor, speedMult * overclock * researchMult * Math.max(0.6, timeSeals));
+      return base * totalMult;
+    };
+
+    const getSlotLimit = () => {
+      const researchSlots = getResearchEffect("slots", 0);
+      const autoSlots = state.tier2.upgrades.slotAutomation;
+      const baseSlots = Math.min(state.slotCount, CONSTANTS.upgrades.slot.max);
+      return Math.min(baseSlots + researchSlots + autoSlots, 12);
+    };
+
+    const getUnlockedTier = () => state.unlockedTier || 1;
+
+    const getUnlockedRecipes = () => {
+      const unlockedTier = getUnlockedTier();
+      return Object.entries(CONSTANTS.baseItems)
+        .filter(([, item]) => item.tier <= unlockedTier)
+        .map(([key]) => key);
+    };
+
+    const syncRecipes = () => {
+      const unlocked = getUnlockedRecipes();
+      state.recipes = {};
+      unlocked.forEach((key) => {
+        state.recipes[key] = true;
+      });
+      needsSlotRender = true;
+      needsUpgradeRender = true;
+    };
+
+    const diminishingMultiplier = (baseBonus, level, decay = 0.85) => {
+      let mult = 1;
+      for (let i = 0; i < level; i += 1) {
+        mult *= 1 + baseBonus * Math.pow(decay, i);
+      }
+      return mult;
+    };
+
+    const getShardPPS = () => {
+      const effMult = diminishingMultiplier(0.12, state.upgrades.shardEffLevel, 0.85);
+      const researchMult = getResearchEffect("shardMult", 1);
+      return CONSTANTS.baseItems.shard.basePPS * effMult * researchMult * getBaseBoostMult();
+    };
+
+    const getBaseBoostMult = () => {
+      return diminishingMultiplier(0.08, state.upgrades.baseBoostLevel, 0.9) * getResearchEffect("baseBoost", 1);
+    };
+
+    const getTier4BaseBoost = () => {
+      return Math.pow(1 + CONSTANTS.tier4Upgrades.aetherBoost.effect, state.tier4.upgrades.aetherBoost);
+    };
+
+    const getTier4MultBoost = () => {
+      return Math.pow(1 + CONSTANTS.tier4Upgrades.mythBoost.effect, state.tier4.upgrades.mythBoost);
+    };
+
+    const getIngotBonus = () => {
+      const base = CONSTANTS.upgrades.ingotPot.base;
+      const max = CONSTANTS.upgrades.ingotPot.max;
+      const level = state.upgrades.ingotPotLevel;
+      const increment = (max - base) / 10;
+      const diminishing = increment * (1 - Math.exp(-level / 4));
+      return base + diminishing + getResearchEffect("ingotBonus", 0);
+    };
+
+    const getRelicBonus = () => {
+      const base = CONSTANTS.upgrades.relicPot.base;
+      const max = CONSTANTS.upgrades.relicPot.max;
+      const level = state.upgrades.relicPotLevel;
+      const increment = (max - base) / 10;
+      const diminishing = increment * (1 - Math.exp(-level / 4));
+      return base + diminishing;
+    };
+
+    const getMultBonus = (key) => {
+      if (key === "ingot") return getIngotBonus();
+      if (key === "rune") return getRelicBonus();
+      const boost = diminishingMultiplier(0.04, state.upgrades.multBoostLevel, 0.85) * getResearchEffect("multBoost", 1);
+      const baseBonus = (CONSTANTS.baseItems[key].bonus || 0) * boost;
+      if (key === "myth") {
+        return baseBonus * getTier4MultBoost();
+      }
+      return baseBonus;
+    };
+
+    const getResearchEffect = (key, fallback = 0) => {
+      let total = fallback;
+      const additiveKeys = new Set(["slots", "ingotBonus", "offlineCap", "startingPoints"]);
+      Object.entries(state.research.levels).forEach(([nodeId, level]) => {
+        if (!level) return;
+        const node = CONSTANTS.research.nodes.find((entry) => entry.id === nodeId);
+        if (node && node.effect[key] !== undefined) {
+          const value = node.effect[key];
+          if (typeof value === "number") {
+            if (additiveKeys.has(key)) {
+              total += value * level;
+            } else {
+              total *= Math.pow(value, level);
+              if (fallback === 0) {
+                total = Math.pow(value, level);
+              }
+            }
+          }
+        }
+      });
+      Object.entries(state.constellations.nodes).forEach(([nodeId, level]) => {
+        if (!level) return;
+        const node = CONSTANTS.constellations.nodes.find((entry) => entry.id === nodeId);
+        if (node && node.effect[key] !== undefined) {
+          const value = node.effect[key];
+          total *= Math.pow(value, level);
+          if (fallback === 0) {
+            total = Math.pow(value, level);
+          }
+        }
+      });
+      return total;
+    };
+
+    const calcTotalMult = () => {
+      const amp = Math.pow(1 + CONSTANTS.tier2Upgrades.amplifier.effect, state.tier2.upgrades.amplifier);
+      const essenceMult = 1 + CONSTANTS.prestige1.essenceMult * state.essence;
+      const prismMult = 1 + CONSTANTS.prestige3.prismMult * state.prisms;
+      const eclipseMult = 1 + CONSTANTS.prestige4.eclipseMult * state.eclipses;
+      const crownMult = 1 + CONSTANTS.prestige5.crownMult * state.crowns;
+      const sanctumBoost = getResearchEffect("sanctumBoost", 1);
+      const sanctumMult = Math.pow(1 + CONSTANTS.sanctum.upgrades.glyphFocus.effect, state.sanctum.upgrades.glyphFocus) * sanctumBoost;
+      const constellationMult = getResearchEffect("starMult", 1);
+      return amp * essenceMult * prismMult * eclipseMult * crownMult * sanctumMult * constellationMult;
+    };
+
+    const calcMachineStats = () => {
+      const gearMult = getResearchEffect("gearMult", 1);
+      const machineMult = getResearchEffect("machinePPS", 1);
+      const pressBoost = getResearchEffect("pressBoost", 1);
+      const foundryBoost = getResearchEffect("foundryBoost", 1);
+      let pps = 0;
+      let gps = 0;
+      Object.entries(CONSTANTS.machines).forEach(([key, machine]) => {
+        const count = state.tier2.machines[key];
+        if (!count) return;
+        let machinePPS = machine.pps * machineMult;
+        if (key === "press") machinePPS *= pressBoost;
+        if (key === "foundry") machinePPS *= foundryBoost;
+        pps += machinePPS * count;
+        gps += machine.gps * count * gearMult;
+      });
+      return { pps, gps };
+    };
+
+    const recalcPPS = () => {
+      const mult = calcTotalMult();
+      const machineStats = calcMachineStats();
+      const dataPenalty = 1 - state.research.slider / 100;
+      let tierPPS = 0;
+      const baseBoost = getBaseBoostMult();
+      const tierBoost = Math.pow(1 + CONSTANTS.tier2Upgrades.tierBoost.effect, state.tier2.upgrades.tierBoost);
+      const sanctumForge = Math.pow(1 + CONSTANTS.sanctum.upgrades.relicForge.effect, state.sanctum.upgrades.relicForge);
+      Object.entries(CONSTANTS.baseItems).forEach(([key, item]) => {
+        if (!state.recipes[key]) return;
+        if (item.type === "base") {
+          let basePPS = (key === "shard" ? getShardPPS() : item.basePPS * baseBoost) * state.items[key];
+          if (item.tier >= 2) {
+            basePPS *= tierBoost;
+          }
+          if (item.tier >= 4) {
+            basePPS *= sanctumForge;
+            if (item.tier === 4) {
+              basePPS *= getTier4BaseBoost();
+            }
+          }
+          const multItem = Object.entries(CONSTANTS.baseItems).find(([, entry]) => entry.tier === item.tier && entry.type === "mult");
+          const multBonus = multItem ? getMultBonus(multItem[0]) : 0;
+          const multCount = multItem ? state.items[multItem[0]] : 0;
+          const tierMult = Math.pow(1 + multBonus, multCount);
+          tierPPS += basePPS * tierMult;
+        }
+      });
+      const totalPPS = (tierPPS * mult + machineStats.pps) * dataPenalty;
+      return { pps: totalPPS, mult, machineStats, tierPPS };
+    };
+
+    const updateSlotsUI = () => {
+      if (!Array.isArray(state.slots)) {
+        state.slots = [];
+      }
+      const slotLimit = getSlotLimit();
+      state.slots = state.slots.slice(0, slotLimit);
+      while (state.slots.length < slotLimit) {
+        addSlot();
+      }
+      const unlockedRecipes = getUnlockedRecipes();
+      if (needsSlotRender || elements.slots.childElementCount !== slotLimit) {
+        elements.slots.innerHTML = "";
+        state.slots.forEach((slot, index) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          const label = document.createElement("h3");
+          label.textContent = `Slot ${index + 1}`;
+          const select = document.createElement("select");
+          Object.entries(CONSTANTS.baseItems).forEach(([recipe, item]) => {
+            if (!state.recipes[recipe]) return;
+            const option = document.createElement("option");
+            option.value = recipe;
+            option.textContent = item.name;
+            if (slot.recipe === recipe) option.selected = true;
+            select.appendChild(option);
+          });
+          select.addEventListener("change", (event) => {
+            slot.recipe = event.target.value;
+            slot.progress = 0;
+          });
+          const progressBar = document.createElement("div");
+          progressBar.className = "progress-bar";
+          const progress = document.createElement("div");
+          progress.className = "progress";
+          progressBar.appendChild(progress);
+          const timeRemaining = document.createElement("div");
+          timeRemaining.className = "subtext slot-time";
+          card.append(label, select, progressBar, timeRemaining);
+          elements.slots.appendChild(card);
+        });
+        needsSlotRender = false;
+      }
+      Array.from(elements.slots.children).forEach((card, index) => {
+        const slot = state.slots[index];
+        if (!slot) return;
+        if (!state.recipes[slot.recipe]) {
+          slot.recipe = unlockedRecipes[0];
+          slot.progress = 0;
+        }
+        const progress = card.querySelector(".progress");
+        const timeRemaining = card.querySelector(".slot-time");
+        const craftTime = getCraftTime(slot.recipe);
+        if (progress) {
+          progress.style.width = `${(slot.progress / craftTime) * 100}%`;
+        }
+        if (timeRemaining) {
+          const remaining = Math.max(0, craftTime - slot.progress);
+          timeRemaining.textContent = `${remaining.toFixed(1)}s remaining`;
+        }
+        const select = card.querySelector("select");
+        if (select && select.value !== slot.recipe) {
+          select.value = slot.recipe;
+        }
+      });
+    };
+
+    const updateUpgradesUI = () => {
+      const upgrades = [
+        {
+          id: "slot",
+          name: "Add Crafting Slot",
+          desc: "Increase slots (max 6 in Tier 1)."
+        },
+        {
+          id: "speed",
+          name: "Speed Tools",
+          desc: "Craft time -5% per level (min 20% of base)."
+        },
+        {
+          id: "shardEff",
+          name: "Shard Efficiency",
+          desc: "Shard PPS +12% per level."
+        },
+        {
+          id: "ingotPot",
+          name: "Ingot Potency",
+          desc: "Increase Tier 1 multiplier bonus."
+        },
+        {
+          id: "relicPot",
+          name: "Rune Potency",
+          desc: "Increase Tier 2 multiplier bonus."
+        },
+        {
+          id: "baseBoost",
+          name: "Base Harmony",
+          desc: "Boost all base item PPS with diminishing returns."
+        },
+        {
+          id: "multBoost",
+          name: "Multiplier Tuning",
+          desc: "Boost all tier multipliers with diminishing returns."
+        }
+      ];
+
+      if (needsUpgradeRender || elements.upgradeList.childElementCount === 0) {
+        elements.upgradeList.innerHTML = "";
+        upgrades.forEach((upgrade) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.dataset.upgradeId = upgrade.id;
+          const title = document.createElement("h3");
+          title.textContent = upgrade.name;
+          const desc = document.createElement("p");
+          desc.className = "subtext";
+          desc.textContent = upgrade.desc;
+          const level = document.createElement("p");
+          level.className = "muted upgrade-level";
+          const cost = document.createElement("p");
+          cost.className = "upgrade-cost";
+          const button = document.createElement("button");
+          button.className = "primary upgrade-buy";
+          card.append(title, desc, level, cost, button);
+          elements.upgradeList.appendChild(card);
+        });
+        needsUpgradeRender = false;
+      }
+
+      Array.from(elements.upgradeList.children).forEach((card) => {
+        const id = card.dataset.upgradeId;
+        const levelEl = card.querySelector(".upgrade-level");
+        const costEl = card.querySelector(".upgrade-cost");
+        const button = card.querySelector(".upgrade-buy");
+        let level = 0;
+        let cost = 0;
+        let maxed = false;
+        let buyCount = 1;
+        if (id === "slot") {
+          level = state.upgrades.slotsPurchased;
+          cost = CONSTANTS.upgrades.slot.baseCost * Math.pow(CONSTANTS.upgrades.slot.scale, level);
+          maxed = level >= CONSTANTS.upgrades.slot.max - 1;
+        } else if (id === "speed") {
+          level = state.upgrades.speedLevel;
+          cost = CONSTANTS.upgrades.speed.baseCost * Math.pow(CONSTANTS.upgrades.speed.scale, level);
+        } else if (id === "shardEff") {
+          level = state.upgrades.shardEffLevel;
+          cost = CONSTANTS.upgrades.shardEff.baseCost * Math.pow(CONSTANTS.upgrades.shardEff.scale, level);
+        } else if (id === "ingotPot") {
+          level = state.upgrades.ingotPotLevel;
+          cost = CONSTANTS.upgrades.ingotPot.baseCost * Math.pow(CONSTANTS.upgrades.ingotPot.scale, level);
+        } else if (id === "relicPot") {
+          level = state.upgrades.relicPotLevel;
+          cost = CONSTANTS.upgrades.relicPot.baseCost * Math.pow(CONSTANTS.upgrades.relicPot.scale, level);
+        } else if (id === "baseBoost") {
+          level = state.upgrades.baseBoostLevel;
+          cost = 250 * Math.pow(2.4, level);
+        } else if (id === "multBoost") {
+          level = state.upgrades.multBoostLevel;
+          cost = 400 * Math.pow(2.6, level);
+        }
+        const config = getTier1UpgradeConfig(id);
+        if (config) {
+          buyCount = getUpgradePurchaseCount({ currency: state.points, ...config });
+          const displayCount = Math.max(1, buyCount);
+          cost = totalCostForLevels(config.baseCost, config.scale, config.level, displayCount);
+        }
+        if (levelEl) levelEl.textContent = `Level: ${level}`;
+        if (costEl) {
+          const labelCount = config ? Math.max(1, buyCount) : 1;
+          costEl.textContent = `Cost (${labelCount}x): ${format(cost)} P`;
+        }
+        if (button) {
+          const labelCount = config ? Math.max(1, buyCount) : 1;
+          button.textContent = maxed ? "Maxed" : `Buy x${labelCount}`;
+          button.onclick = () => buyUpgrade(id);
+          button.disabled = maxed || buyCount === 0;
+        }
+      });
+      updateBuyToggleUI();
+    };
+
+    const updateMachineUI = () => {
+      if (needsMachineRender || elements.machineList.childElementCount === 0) {
+        elements.machineList.innerHTML = "";
+        Object.entries(CONSTANTS.machines).forEach(([key, machine]) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.dataset.machineId = key;
+          const title = document.createElement("h3");
+          title.textContent = machine.name;
+          const owned = document.createElement("p");
+          owned.className = "muted machine-owned";
+          const details = document.createElement("p");
+          details.className = "subtext";
+          details.textContent = `+${machine.pps} PPS, +${machine.gps} GPS`;
+          const req = document.createElement("p");
+          req.className = "subtext machine-req";
+          const button = document.createElement("button");
+          button.className = "primary machine-buy";
+          button.addEventListener("click", () => buyMachine(key));
+          card.append(title, owned, details, req, button);
+          elements.machineList.appendChild(card);
+        });
+        needsMachineRender = false;
+      }
+
+      Array.from(elements.machineList.children).forEach((card) => {
+        const key = card.dataset.machineId;
+        const machine = CONSTANTS.machines[key];
+        const owned = card.querySelector(".machine-owned");
+        const req = card.querySelector(".machine-req");
+        const button = card.querySelector(".machine-buy");
+        const count = state.tier2.machines[key];
+        const buyCount = getUpgradePurchaseCount(
+          {
+            currency: state.points,
+            baseCost: machine.cost,
+            scale: machine.scale,
+            level: count
+          },
+          state.buyMode
+        );
+        const displayCount = Math.max(1, buyCount);
+        const cost = totalCostForLevels(machine.cost, machine.scale, count, displayCount);
+        if (owned) owned.textContent = `Owned: ${count}`;
+        if (req) req.textContent = machine.essenceReq > 0 ? `Requires ${machine.essenceReq} Essence` : "Unlocked";
+        if (button) {
+          button.textContent = `Buy x${displayCount} (${format(cost)} P)`;
+          button.disabled = buyCount === 0 || state.points < cost || state.essence < machine.essenceReq;
+        }
+      });
+    };
+
+    const updateTier2UpgradesUI = () => {
+      if (needsTier2UpgradeRender || elements.tier2UpgradeList.childElementCount === 0) {
+        elements.tier2UpgradeList.innerHTML = "";
+        Object.entries(CONSTANTS.tier2Upgrades).forEach(([key, upgrade]) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.dataset.tier2UpgradeId = key;
+          const title = document.createElement("h3");
+          title.textContent = upgrade.name;
+          const desc = document.createElement("p");
+          desc.className = "subtext";
+          desc.textContent = upgrade.desc || "";
+          const level = document.createElement("p");
+          level.className = "muted tier2-level";
+          const button = document.createElement("button");
+          button.className = "primary tier2-buy";
+          button.addEventListener("click", () => buyTier2Upgrade(key));
+          card.append(title, desc, level, button);
+          elements.tier2UpgradeList.appendChild(card);
+        });
+        needsTier2UpgradeRender = false;
+      }
+
+      Array.from(elements.tier2UpgradeList.children).forEach((card) => {
+        const key = card.dataset.tier2UpgradeId;
+        const upgrade = CONSTANTS.tier2Upgrades[key];
+        const level = state.tier2.upgrades[key];
+        const buyCount = getUpgradePurchaseCount(
+          {
+            currency: state.tier2.gears,
+            baseCost: upgrade.cost,
+            scale: upgrade.scale,
+            level,
+            max: upgrade.max ?? Infinity
+          },
+          state.buyMode
+        );
+        const displayCount = Math.max(1, buyCount);
+        const cost = totalCostForLevels(upgrade.cost, upgrade.scale, level, displayCount);
+        const levelEl = card.querySelector(".tier2-level");
+        const button = card.querySelector(".tier2-buy");
+        if (levelEl) levelEl.textContent = `Level: ${level}`;
+        if (button) {
+          button.textContent = `Buy x${displayCount} (${format(cost)} G)`;
+          button.disabled = buyCount === 0 || (upgrade.max && level >= upgrade.max);
+        }
+      });
+    };
+
+    const updateTier4UpgradesUI = () => {
+      if (!elements.tier4UpgradeList) return;
+      if (needsTier4UpgradeRender || elements.tier4UpgradeList.childElementCount === 0) {
+        elements.tier4UpgradeList.innerHTML = "";
+        Object.entries(CONSTANTS.tier4Upgrades).forEach(([key, upgrade]) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.dataset.tier4UpgradeId = key;
+          const title = document.createElement("h3");
+          title.textContent = upgrade.name;
+          const desc = document.createElement("p");
+          desc.className = "subtext";
+          desc.textContent = upgrade.desc || "";
+          const level = document.createElement("p");
+          level.className = "muted tier4-level";
+          const button = document.createElement("button");
+          button.className = "primary tier4-buy";
+          button.addEventListener("click", () => buyTier4Upgrade(key));
+          card.append(title, desc, level, button);
+          elements.tier4UpgradeList.appendChild(card);
+        });
+        needsTier4UpgradeRender = false;
+      }
+
+      Array.from(elements.tier4UpgradeList.children).forEach((card) => {
+        const key = card.dataset.tier4UpgradeId;
+        const upgrade = CONSTANTS.tier4Upgrades[key];
+        const level = state.tier4.upgrades[key];
+        const buyCount = getUpgradePurchaseCount(
+          {
+            currency: state.points,
+            baseCost: upgrade.cost,
+            scale: upgrade.scale,
+            level,
+            max: upgrade.max
+          },
+          state.buyMode
+        );
+        const displayCount = Math.max(1, buyCount);
+        const cost = totalCostForLevels(upgrade.cost, upgrade.scale, level, displayCount);
+        const levelEl = card.querySelector(".tier4-level");
+        const button = card.querySelector(".tier4-buy");
+        if (levelEl) levelEl.textContent = `Level: ${level}/${upgrade.max}`;
+        if (button) {
+          button.textContent = `Buy x${displayCount} (${format(cost)} P)`;
+          button.disabled = buyCount === 0 || level >= upgrade.max;
+        }
+      });
+    };
+
+    const updateAutomationTabUI = () => {
+      if (!elements.automationUpgradeList || !elements.automationGeneratorList) return;
+      if (needsAutomationRender || elements.automationUpgradeList.childElementCount === 0) {
+        elements.automationUpgradeList.innerHTML = "";
+        Object.entries(CONSTANTS.automationUpgrades).forEach(([key, upgrade]) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.dataset.automationId = key;
+          const title = document.createElement("h3");
+          title.textContent = upgrade.name;
+          const desc = document.createElement("p");
+          desc.className = "subtext";
+          desc.textContent = upgrade.desc;
+          const level = document.createElement("p");
+          level.className = "muted automation-level";
+          const cost = document.createElement("p");
+          cost.className = "muted automation-cost";
+          const toggle = document.createElement("div");
+          toggle.className = "toggle automation-toggle hidden";
+          const toggleInput = document.createElement("input");
+          toggleInput.type = "checkbox";
+          toggleInput.className = "automation-toggle-input";
+          const toggleLabel = document.createElement("label");
+          toggleLabel.textContent = "Enabled";
+          toggle.append(toggleInput, toggleLabel);
+          const button = document.createElement("button");
+          button.className = "primary automation-buy";
+          button.addEventListener("click", () => buyAutomationUpgrade(key));
+          card.append(title, desc, level, cost, toggle, button);
+          elements.automationUpgradeList.appendChild(card);
+        });
+        elements.automationGeneratorList.innerHTML = "";
+        Object.entries(CONSTANTS.prestigeGenerators).forEach(([key, generator]) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.dataset.generatorId = key;
+          const title = document.createElement("h3");
+          title.textContent = generator.name;
+          const desc = document.createElement("p");
+          desc.className = "subtext";
+          desc.textContent = "Generates up to 10% of your prestige gain per second.";
+          const level = document.createElement("p");
+          level.className = "muted generator-level";
+          const cost = document.createElement("p");
+          cost.className = "muted generator-cost";
+          const button = document.createElement("button");
+          button.className = "primary generator-buy";
+          button.addEventListener("click", () => buyPrestigeGenerator(key));
+          card.append(title, desc, level, cost, button);
+          elements.automationGeneratorList.appendChild(card);
+        });
+        needsAutomationRender = false;
+      }
+
+      Array.from(elements.automationUpgradeList.children).forEach((card) => {
+        const key = card.dataset.automationId;
+        const upgrade = CONSTANTS.automationUpgrades[key];
+        const levelKey = `${key}Level`;
+        const enabledKey = `${key}Enabled`;
+        const unlocked = hasPrestigeLevel(upgrade.unlockPrestige);
+        const level = state.automation[levelKey] || 0;
+        const toggleEl = card.querySelector(".automation-toggle");
+        const toggleInput = card.querySelector(".automation-toggle-input");
+        const levelEl = card.querySelector(".automation-level");
+        const costEl = card.querySelector(".automation-cost");
+        const button = card.querySelector(".automation-buy");
+        const currencyAmount = getCurrencyAmount(upgrade.currency);
+        const buyCount = getUpgradePurchaseCount(
+          {
+            currency: currencyAmount,
+            baseCost: upgrade.baseCost,
+            scale: upgrade.scale,
+            level,
+            max: upgrade.max
+          },
+          state.buyMode
+        );
+        const displayCount = Math.max(1, buyCount);
+        const cost = totalCostForLevels(upgrade.baseCost, upgrade.scale, level, displayCount);
+        if (levelEl) {
+          const intervalText = upgrade.intervals
+            ? (level === 0 ? "Inactive" : (upgrade.intervals[level - 1] === 0 ? "Always" : `${upgrade.intervals[level - 1] / 1000}s`))
+            : "Unlocked";
+          levelEl.textContent = `Level: ${level}/${upgrade.max} • Interval: ${intervalText}`;
+        }
+        if (costEl) {
+          costEl.textContent = unlocked
+            ? `Cost (${displayCount}x): ${format(cost)} ${upgrade.currency}`
+            : `Requires Prestige ${upgrade.unlockPrestige}`;
+        }
+        if (toggleEl && toggleInput) {
+          const hasToggle = upgrade.intervals || key === "t1Slotter";
+          toggleEl.classList.toggle("hidden", !hasToggle);
+          toggleInput.checked = Boolean(state.automation[enabledKey]);
+          toggleInput.disabled = !unlocked || level === 0;
+          toggleInput.onchange = () => {
+            if (!unlocked || level === 0) {
+              toggleInput.checked = false;
+              return;
+            }
+            state.automation[enabledKey] = toggleInput.checked;
+            saveGame();
+            refreshUI();
+          };
+        }
+        if (button) {
+          button.textContent = level >= upgrade.max ? "Maxed" : `Buy x${displayCount}`;
+          button.disabled = !unlocked || buyCount === 0 || level >= upgrade.max;
+        }
+      });
+
+      Array.from(elements.automationGeneratorList.children).forEach((card) => {
+        const key = card.dataset.generatorId;
+        const generator = CONSTANTS.prestigeGenerators[key];
+        const unlocked = hasPrestigeLevel(generator.unlockPrestige);
+        const level = state.automation.generators[key] || 0;
+        const currencyAmount = getCurrencyAmount(generator.currency);
+        const buyCount = getUpgradePurchaseCount(
+          {
+            currency: currencyAmount,
+            baseCost: generator.baseCost,
+            scale: generator.scale,
+            level,
+            max: generator.max
+          },
+          state.buyMode
+        );
+        const displayCount = Math.max(1, buyCount);
+        const cost = totalCostForLevels(generator.baseCost, generator.scale, level, displayCount);
+        const levelEl = card.querySelector(".generator-level");
+        const costEl = card.querySelector(".generator-cost");
+        const button = card.querySelector(".generator-buy");
+        if (levelEl) levelEl.textContent = `Level: ${level}/${generator.max}`;
+        if (costEl) {
+          costEl.textContent = unlocked
+            ? `Cost (${displayCount}x): ${format(cost)} ${generator.currency}`
+            : `Requires Prestige ${generator.unlockPrestige}`;
+        }
+        if (button) {
+          button.textContent = level >= generator.max ? "Maxed" : `Buy x${displayCount}`;
+          button.disabled = !unlocked || buyCount === 0 || level >= generator.max;
+        }
+      });
+    };
+
+    const updateSanctumUI = () => {
+      if (!elements.sanctumList) return;
+      if (needsSanctumRender || elements.sanctumList.childElementCount === 0) {
+        elements.sanctumList.innerHTML = "";
+        Object.entries(CONSTANTS.sanctum.upgrades).forEach(([key, upgrade]) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.dataset.sanctumId = key;
+          const title = document.createElement("h3");
+          title.textContent = upgrade.name;
+          const desc = document.createElement("p");
+          desc.className = "subtext";
+          desc.textContent = upgrade.desc;
+          const level = document.createElement("p");
+          level.className = "muted sanctum-level";
+          const button = document.createElement("button");
+          button.className = "primary sanctum-buy";
+          button.addEventListener("click", () => buySanctumUpgrade(key));
+          card.append(title, desc, level, button);
+          elements.sanctumList.appendChild(card);
+        });
+        needsSanctumRender = false;
+      }
+      if (elements.glyphCount) {
+        elements.glyphCount.textContent = format(state.sanctum.glyphs);
+      }
+      Array.from(elements.sanctumList.children).forEach((card) => {
+        const key = card.dataset.sanctumId;
+        const upgrade = CONSTANTS.sanctum.upgrades[key];
+        const level = state.sanctum.upgrades[key];
+        const buyCount = getUpgradePurchaseCount(
+          {
+            currency: state.points,
+            baseCost: upgrade.cost,
+            scale: upgrade.scale,
+            level,
+            max: upgrade.max
+          },
+          state.buyMode
+        );
+        const displayCount = Math.max(1, buyCount);
+        const cost = totalCostForLevels(upgrade.cost, upgrade.scale, level, displayCount);
+        const levelEl = card.querySelector(".sanctum-level");
+        const button = card.querySelector(".sanctum-buy");
+        if (levelEl) levelEl.textContent = `Level: ${level}/${upgrade.max}`;
+        if (button) {
+          button.textContent = `Buy x${displayCount} (${format(cost)} P)`;
+          button.disabled = buyCount === 0 || level >= upgrade.max;
+        }
+      });
+    };
+
+    const updateConstellationUI = () => {
+      if (!elements.constellationList) return;
+      if (needsConstellationRender || elements.constellationList.childElementCount === 0) {
+        elements.constellationList.innerHTML = "";
+        CONSTANTS.constellations.nodes.forEach((node) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.dataset.starId = node.id;
+          const title = document.createElement("h3");
+          title.textContent = node.name;
+          const desc = document.createElement("p");
+          desc.className = "subtext";
+          desc.textContent = node.desc;
+          const level = document.createElement("p");
+          level.className = "muted star-level";
+          const cost = document.createElement("p");
+          cost.className = "muted star-cost";
+          const button = document.createElement("button");
+          button.className = "primary star-buy";
+          button.addEventListener("click", () => buyConstellation(node.id));
+          card.append(title, desc, level, cost, button);
+          elements.constellationList.appendChild(card);
+        });
+        needsConstellationRender = false;
+      }
+      if (elements.starCount) {
+        elements.starCount.textContent = format(state.constellations.stars);
+      }
+      Array.from(elements.constellationList.children).forEach((card) => {
+        const nodeId = card.dataset.starId;
+        const node = CONSTANTS.constellations.nodes.find((entry) => entry.id === nodeId);
+        const level = state.constellations.nodes[nodeId] || 0;
+        const buyCount = getUpgradePurchaseCount(
+          {
+            currency: state.constellations.stars,
+            baseCost: node.cost,
+            scale: 1.8,
+            level,
+            max: node.max
+          },
+          state.buyMode
+        );
+        const displayCount = Math.max(1, buyCount);
+        const cost = totalCostForLevels(node.cost, 1.8, level, displayCount);
+        const levelEl = card.querySelector(".star-level");
+        const costEl = card.querySelector(".star-cost");
+        const button = card.querySelector(".star-buy");
+        if (levelEl) levelEl.textContent = `Level: ${level}/${node.max}`;
+        if (costEl) costEl.textContent = `Cost: ${format(cost)} Stars`;
+        if (button) {
+          button.textContent = `Acquire x${displayCount}`;
+          button.disabled = buyCount === 0 || level >= node.max || state.constellations.stars < cost;
+        }
+      });
+    };
+
+    const updateResearchUI = () => {
+      if (needsResearchRender || elements.researchList.childElementCount === 0) {
+        elements.researchList.innerHTML = "";
+        const groups = {};
+        CONSTANTS.research.nodes.forEach((node) => {
+          if (!groups[node.branch]) groups[node.branch] = [];
+          groups[node.branch].push(node);
+        });
+        Object.entries(groups).forEach(([branch, nodes]) => {
+          nodes.forEach((node) => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.dataset.researchId = node.id;
+            const title = document.createElement("h3");
+            title.textContent = node.name;
+            const branchBadge = document.createElement("span");
+            branchBadge.className = "badge";
+            branchBadge.textContent = branch;
+            const desc = document.createElement("p");
+            desc.className = "subtext";
+            desc.textContent = node.desc;
+            const cost = document.createElement("p");
+            cost.className = "muted research-cost";
+            const reqs = document.createElement("p");
+            reqs.className = "subtext research-reqs";
+            const levelText = document.createElement("p");
+            levelText.className = "muted research-level";
+            const button = document.createElement("button");
+            button.className = "primary research-buy";
+            button.addEventListener("click", () => buyResearch(node.id));
+            card.append(title, branchBadge, desc, cost, reqs, levelText, button);
+            elements.researchList.appendChild(card);
+          });
+        });
+        needsResearchRender = false;
+      }
+
+      Array.from(elements.researchList.children).forEach((card) => {
+        const nodeId = card.dataset.researchId;
+        const node = CONSTANTS.research.nodes.find((entry) => entry.id === nodeId);
+        if (!node) return;
+        const level = state.research.levels[nodeId] || 0;
+        const maxLevel = node.maxLevel ?? 1;
+        const costScale = node.costScale ?? 1;
+        const essenceReq = (node.essenceReq ?? 0) * (level + 1);
+        const coreReq = (node.coreReq ?? 0) * (level + 1);
+        const prismReq = (node.prismReq ?? 0) * (level + 1);
+        const eclipseReq = (node.eclipseReq ?? 0) * (level + 1);
+        const crownReq = (node.crownReq ?? 0) * (level + 1);
+        const cost = node.cost * Math.pow(costScale, level);
+        const costEl = card.querySelector(".research-cost");
+        const reqEl = card.querySelector(".research-reqs");
+        const levelEl = card.querySelector(".research-level");
+        const button = card.querySelector(".research-buy");
+        const requirements = [
+          { label: "Essence", value: essenceReq },
+          { label: "Cores", value: coreReq },
+          { label: "Prisms", value: prismReq },
+          { label: "Eclipses", value: eclipseReq },
+          { label: "Crowns", value: crownReq }
+        ].filter((req) => req.value > 0);
+        const reqText = requirements.length
+          ? `Requires ${requirements.map((req) => `${format(req.value)} ${req.label}`).join(", ")}`
+          : "No prestige requirement";
+        if (costEl) costEl.textContent = `Cost: ${format(cost)} Data`;
+        if (reqEl) reqEl.textContent = reqText;
+        if (levelEl) levelEl.textContent = `Level: ${level}/${maxLevel}`;
+        if (button) {
+          const maxed = level >= maxLevel;
+          button.className = maxed ? "ghost research-buy" : "primary research-buy";
+          button.textContent = maxed ? "Maxed" : "Research";
+          button.disabled = maxed
+            || state.research.data < cost
+            || state.essence < essenceReq
+            || state.cores < coreReq
+            || state.prisms < prismReq
+            || state.eclipses < eclipseReq
+            || state.crowns < crownReq;
+        }
+      });
+    };
+
+    const updateStatsUI = () => {
+      const stats = [
+        { label: "Total Points This Run", value: format(state.totalPoints) },
+        { label: "Lifetime Points", value: format(state.lifetimePoints) },
+        { label: "Total Gears This Run", value: format(state.totalGears) },
+        { label: "Total Data This Run", value: format(state.totalData) },
+        { label: "Glyphs Stored", value: format(state.sanctum.glyphs) },
+        { label: "Stars Stored", value: format(state.constellations.stars) },
+        { label: "Essence Dust", value: format(state.dust.essence) },
+        { label: "Core Dust", value: format(state.dust.core) },
+        { label: "Prism Dust", value: format(state.dust.prism) },
+        { label: "Time This Run (min)", value: (state.timeThisRun / 60).toFixed(1) },
+        { label: "Prestige 1 Count", value: state.prestige1Count },
+        { label: "Prestige 2 Count", value: state.prestige2Count },
+        { label: "Prestige 3 Count", value: state.prestige3Count },
+        { label: "Prestige 4 Count", value: state.prestige4Count },
+        { label: "Prestige 5 Count", value: state.prestige5Count },
+        { label: "Best Prestige 1 Time (min)", value: state.stats.bestPrestige1Time ? state.stats.bestPrestige1Time.toFixed(1) : "-" },
+        { label: "Best Prestige 2 Time (min)", value: state.stats.bestPrestige2Time ? state.stats.bestPrestige2Time.toFixed(1) : "-" }
+      ];
+      elements.statsList.innerHTML = "";
+      stats.forEach((stat) => {
+        const item = document.createElement("li");
+        item.textContent = `${stat.label}: ${stat.value}`;
+        elements.statsList.appendChild(item);
+      });
+    };
+
+    const updateHeader = () => {
+      const { pps, mult } = recalcPPS();
+      elements.points.textContent = format(state.points);
+      elements.pps.textContent = format(pps);
+      elements.multiplier.textContent = `x${mult.toFixed(2)}`;
+      elements.prestigeCurrencies.textContent = `${format(state.essence)} / ${format(state.cores)} / ${format(state.prisms)} / ${format(state.eclipses)} / ${format(state.crowns)}`;
+    };
+
+    const updateBreakdownUI = () => {
+      const amp = Math.pow(1 + CONSTANTS.tier2Upgrades.amplifier.effect, state.tier2.upgrades.amplifier);
+      const essenceMult = 1 + CONSTANTS.prestige1.essenceMult * state.essence;
+      const prismMult = 1 + CONSTANTS.prestige3.prismMult * state.prisms;
+      const eclipseMult = 1 + CONSTANTS.prestige4.eclipseMult * state.eclipses;
+      const crownMult = 1 + CONSTANTS.prestige5.crownMult * state.crowns;
+      const sanctumBoost = getResearchEffect("sanctumBoost", 1);
+      const sanctumMult = Math.pow(1 + CONSTANTS.sanctum.upgrades.glyphFocus.effect, state.sanctum.upgrades.glyphFocus) * sanctumBoost;
+      const constellationMult = getResearchEffect("starMult", 1);
+      const machineStats = calcMachineStats();
+      const dataPenalty = 1 - state.research.slider / 100;
+      const tierLines = [];
+      let baseTotal = 0;
+      Object.entries(CONSTANTS.baseItems).forEach(([key, item]) => {
+        if (!state.recipes[key] || item.type !== "base") return;
+        let basePPS = (key === "shard" ? getShardPPS() : item.basePPS * getBaseBoostMult()) * state.items[key];
+        const tierBoost = Math.pow(1 + CONSTANTS.tier2Upgrades.tierBoost.effect, state.tier2.upgrades.tierBoost);
+        const sanctumForge = Math.pow(1 + CONSTANTS.sanctum.upgrades.relicForge.effect, state.sanctum.upgrades.relicForge);
+        if (item.tier >= 2) {
+          basePPS *= tierBoost;
+        }
+        if (item.tier >= 4) {
+          basePPS *= sanctumForge;
+          if (item.tier === 4) {
+            basePPS *= getTier4BaseBoost();
+          }
+        }
+        const multItem = Object.entries(CONSTANTS.baseItems).find(([, entry]) => entry.tier === item.tier && entry.type === "mult");
+        const multKey = multItem ? multItem[0] : null;
+        const bonus = multKey ? getMultBonus(multKey) : 0;
+        const count = multKey ? state.items[multKey] : 0;
+        const tierMult = Math.pow(1 + bonus, count);
+        baseTotal += basePPS * tierMult;
+        tierLines.push(`${item.name} tier: ${format(basePPS)} PPS x${tierMult.toFixed(2)}`);
+      });
+      const finalPPS = (baseTotal * amp * essenceMult * prismMult * eclipseMult * crownMult * sanctumMult * constellationMult + machineStats.pps) * dataPenalty;
+      const breakdown = [
+        ...tierLines,
+        `Amplifier: x${amp.toFixed(2)}`,
+        `Essence: x${essenceMult.toFixed(2)}`,
+        `Prisms: x${prismMult.toFixed(2)}`,
+        `Eclipses: x${eclipseMult.toFixed(2)}`,
+        `Crowns: x${crownMult.toFixed(2)}`,
+        `Sanctum: x${sanctumMult.toFixed(2)}`,
+        `Constellation: x${constellationMult.toFixed(2)}`,
+        `Machines: +${format(machineStats.pps)} PPS`,
+        `Data conversion: x${dataPenalty.toFixed(2)}`
+      ].join("\n");
+      const totalEl = document.getElementById("pps-breakdown-total");
+      const breakdownEl = document.getElementById("pps-breakdown");
+      if (totalEl) totalEl.textContent = format(finalPPS);
+      if (breakdownEl) breakdownEl.textContent = breakdown;
+    };
+
+    const updateInventory = () => {
+      if (needsUpgradeRender || elements.inventoryList.childElementCount === 0) {
+        elements.inventoryList.innerHTML = "";
+        Object.entries(CONSTANTS.baseItems).forEach(([key, item]) => {
+          if (!state.recipes[key]) return;
+          const card = document.createElement("div");
+          card.className = "card";
+          card.dataset.itemId = key;
+          const title = document.createElement("h3");
+          title.textContent = item.name;
+          const count = document.createElement("p");
+          count.className = "item-count";
+          const desc = document.createElement("p");
+          desc.className = "subtext";
+          desc.textContent = item.type === "base"
+            ? "Base PPS item."
+            : "Tier multiplier item.";
+          card.append(title, count, desc);
+          elements.inventoryList.appendChild(card);
+        });
+      }
+      Array.from(elements.inventoryList.children).forEach((card) => {
+        const key = card.dataset.itemId;
+        const countEl = card.querySelector(".item-count");
+        if (countEl) countEl.textContent = `${format(state.items[key] || 0)} owned`;
+      });
+    };
+
+    const updateCraftingInsights = () => {
+      if (!elements.craftingInsights) return;
+      elements.craftingInsights.innerHTML = "";
+      const entries = Object.entries(CONSTANTS.baseItems)
+        .filter(([key]) => state.recipes[key])
+        .map(([key, item]) => {
+          const craftTime = getCraftTime(key);
+          let ppsGain = 0;
+          if (item.type === "base") {
+            let basePPS = (key === "shard" ? getShardPPS() : item.basePPS * getBaseBoostMult());
+            const tierBoost = Math.pow(1 + CONSTANTS.tier2Upgrades.tierBoost.effect, state.tier2.upgrades.tierBoost);
+            const sanctumForge = Math.pow(1 + CONSTANTS.sanctum.upgrades.relicForge.effect, state.sanctum.upgrades.relicForge);
+            if (item.tier >= 2) basePPS *= tierBoost;
+            if (item.tier >= 4) basePPS *= sanctumForge;
+            if (item.tier === 4) basePPS *= getTier4BaseBoost();
+            const multItem = Object.entries(CONSTANTS.baseItems).find(([, entry]) => entry.tier === item.tier && entry.type === "mult");
+            const multKey = multItem ? multItem[0] : null;
+            const bonus = multKey ? getMultBonus(multKey) : 0;
+            const count = multKey ? state.items[multKey] : 0;
+            const tierMult = Math.pow(1 + bonus, count);
+            ppsGain = basePPS * tierMult;
+          } else {
+            const baseItem = Object.entries(CONSTANTS.baseItems).find(([, entry]) => entry.tier === item.tier && entry.type === "base");
+            const baseKey = baseItem ? baseItem[0] : null;
+            let basePPS = baseKey === "shard" ? getShardPPS() : (baseKey ? CONSTANTS.baseItems[baseKey].basePPS * getBaseBoostMult() : 0);
+            const baseItemData = baseKey ? CONSTANTS.baseItems[baseKey] : null;
+            if (baseItemData) {
+              const tierBoost = Math.pow(1 + CONSTANTS.tier2Upgrades.tierBoost.effect, state.tier2.upgrades.tierBoost);
+              const sanctumForge = Math.pow(1 + CONSTANTS.sanctum.upgrades.relicForge.effect, state.sanctum.upgrades.relicForge);
+              if (baseItemData.tier >= 2) basePPS *= tierBoost;
+              if (baseItemData.tier >= 4) basePPS *= sanctumForge;
+              if (baseItemData.tier === 4) basePPS *= getTier4BaseBoost();
+            }
+            const baseCount = baseKey ? state.items[baseKey] : 0;
+            const bonus = getMultBonus(key);
+            const tierMult = baseCount > 0 ? Math.pow(1 + bonus, baseCount) : 0;
+            ppsGain = basePPS * tierMult * 0.1;
+          }
+          return { key, item, craftTime, ppsGain };
+        })
+        .sort((a, b) => b.ppsGain / b.craftTime - a.ppsGain / a.craftTime)
+        .slice(0, 4);
+      entries.forEach((entry) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        const title = document.createElement("h3");
+        title.textContent = entry.item.name;
+        const desc = document.createElement("p");
+        desc.className = "subtext";
+        desc.textContent = `Estimated PPS per craft: ${format(entry.ppsGain)} | Craft time: ${entry.craftTime.toFixed(1)}s`;
+        card.append(title, desc);
+        elements.craftingInsights.appendChild(card);
+      });
+    };
+
+    const updateUnlockButtons = () => {
+      elements.recipeUnlockList.innerHTML = "";
+      CONSTANTS.recipeUnlocks.tiers.forEach((tierInfo) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        const title = document.createElement("h3");
+        title.textContent = tierInfo.name;
+        const status = document.createElement("p");
+        status.className = "subtext";
+        status.textContent = tierInfo.unlock;
+        const unlocked = getUnlockedTier() >= tierInfo.tier;
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = unlocked ? "Unlocked" : "Locked";
+        card.append(title, status, badge);
+        elements.recipeUnlockList.appendChild(card);
+      });
+    };
+
+    const updatePrestigeUI = () => {
+      const essenceGain = calcEssenceGain();
+      const coresGain = calcCoreGain();
+      const prismGain = calcPrismGain();
+      const eclipseGain = calcEclipseGain();
+      const crownGain = calcCrownGain();
+      elements.prestige1Gain.textContent = `Gain ${essenceGain} Essence on reset.`;
+      elements.prestige2Gain.textContent = `Gain ${coresGain} Cores on reset.`;
+      elements.prestige3Gain.textContent = `Gain ${prismGain} Prisms on reset.`;
+      elements.prestige4Gain.textContent = `Gain ${eclipseGain} Eclipses on reset.`;
+      elements.prestige5Gain.textContent = `Gain ${crownGain} Crowns on reset.`;
+      elements.prestige1.disabled = !canPrestige1();
+      elements.prestige2.disabled = !canPrestige2();
+      elements.prestige3.disabled = !canPrestige3();
+      elements.prestige4.disabled = !canPrestige4();
+      elements.prestige5.disabled = !canPrestige5();
+    };
+
+    const updateDustUI = () => {
+      if (elements.dustEssence) elements.dustEssence.textContent = format(state.dust.essence);
+      if (elements.dustCore) elements.dustCore.textContent = format(state.dust.core);
+      if (elements.dustPrism) elements.dustPrism.textContent = format(state.dust.prism);
+    };
+
+    const updateTier2CurrencyUI = () => {
+      elements.gearsCount.textContent = format(state.tier2.gears);
+    };
+
+    const hasPrestigeLevel = (level) => {
+      if (level <= 0) return true;
+      const count = state[`prestige${level}Count`] || 0;
+      return count > 0 || state.unlockedTier >= level + 1;
+    };
+
+    const updateTabVisibility = () => {
+      const unlockedTier = state.unlockedTier || 1;
+      const hasPrestige1 = state.prestige1Count > 0 || unlockedTier >= 2;
+      const hasPrestige2 = state.prestige2Count > 0 || unlockedTier >= 3;
+      const hasPrestige3 = state.prestige3Count > 0 || unlockedTier >= 4;
+      const hasPrestige4 = state.prestige4Count > 0 || unlockedTier >= 5;
+      const hasPrestige5 = state.prestige5Count > 0 || unlockedTier >= 6;
+      if (elements.tabMachines) {
+        elements.tabMachines.classList.toggle("hidden", !hasPrestige1);
+      }
+      if (elements.tabTier2Upgrades) {
+        elements.tabTier2Upgrades.classList.toggle("hidden", !hasPrestige1);
+      }
+      if (elements.tabSanctum) {
+        elements.tabSanctum.classList.toggle("hidden", !hasPrestige4);
+      }
+      if (elements.tabResearch) {
+        elements.tabResearch.classList.toggle("hidden", !hasPrestige2);
+      }
+      if (elements.tabTier4) {
+        elements.tabTier4.classList.toggle("hidden", !hasPrestige3);
+      }
+      if (elements.tabAutomation) {
+        elements.tabAutomation.classList.toggle("hidden", !hasPrestige2);
+      }
+      if (elements.tabConstellation) {
+        elements.tabConstellation.classList.toggle("hidden", !hasPrestige5);
+      }
+      if (hasPrestige4) {
+        needsSanctumRender = true;
+      }
+      if (hasPrestige5) {
+        needsConstellationRender = true;
+      }
+      if (hasPrestige3) {
+        needsTier4UpgradeRender = true;
+      }
+      if (hasPrestige2) {
+        needsAutomationRender = true;
+      }
+      const activeButton = document.querySelector("nav button.active");
+      if (activeButton && activeButton.classList.contains("hidden")) {
+        const craftingButton = document.querySelector("nav button[data-tab=\"crafting\"]");
+        if (craftingButton) craftingButton.click();
+      }
+    };
+
+    const updateDataUI = () => {
+      elements.dataCount.textContent = format(state.research.data);
+      elements.dataSlider.value = state.research.slider;
+      elements.dataSliderValue.textContent = `${state.research.slider}%`;
+    };
+
+    const updateDebug = () => {
+      if (elements.debugPanel.classList.contains("hidden")) return;
+      elements.debugOutput.textContent = JSON.stringify(state, null, 2);
+    };
+
+    const refreshUI = () => {
+      updateHeader();
+      updateBreakdownUI();
+      updateInventory();
+      updateCraftingInsights();
+      updateUnlockButtons();
+      updateSlotsUI();
+      updateUpgradesUI();
+      updateMachineUI();
+      updateTier2UpgradesUI();
+      updateTier4UpgradesUI();
+      updatePrestigeUI();
+      updateDustUI();
+      updateResearchUI();
+      updateAutomationTabUI();
+      updateSanctumUI();
+      updateConstellationUI();
+      updateStatsUI();
+      updateDataUI();
+      updateTier2CurrencyUI();
+      updateTabVisibility();
+      updateDebug();
+    };
+
+    const buyUpgrade = (id, overrideCount = null) => {
+      const config = getTier1UpgradeConfig(id);
+      if (!config) return;
+      const buyCount = overrideCount ?? getUpgradePurchaseCount({ currency: state.points, ...config });
+      if (buyCount <= 0) return;
+      const totalCost = totalCostForLevels(config.baseCost, config.scale, config.level, buyCount);
+      if (state.points < totalCost) return;
+      state.points -= totalCost;
+      const newLevel = config.level + buyCount;
+      config.setLevel(newLevel);
+      if (id === "slot") {
+        state.slotCount += buyCount;
+        for (let i = 0; i < buyCount; i += 1) {
+          state.slots.push({ recipe: "shard", progress: 0 });
+        }
+        needsSlotRender = true;
+      }
+      saveGame();
+      refreshUI();
+    };
+
+    const buyMachine = (id) => {
+      const machine = CONSTANTS.machines[id];
+      const level = state.tier2.machines[id];
+      const buyCount = getUpgradePurchaseCount(
+        {
+          currency: state.points,
+          baseCost: machine.cost,
+          scale: machine.scale,
+          level
+        },
+        state.buyMode
+      );
+      if (buyCount <= 0 || state.essence < machine.essenceReq) return;
+      const totalCost = totalCostForLevels(machine.cost, machine.scale, level, buyCount);
+      if (state.points < totalCost) return;
+      state.points -= totalCost;
+      state.tier2.machines[id] += buyCount;
+      saveGame();
+      refreshUI();
+    };
+
+    const buyTier2Upgrade = (id, overrideCount = null) => {
+      const upgrade = CONSTANTS.tier2Upgrades[id];
+      const level = state.tier2.upgrades[id];
+      const buyCount = overrideCount ?? getUpgradePurchaseCount({
+        currency: state.tier2.gears,
+        baseCost: upgrade.cost,
+        scale: upgrade.scale,
+        level,
+        max: upgrade.max ?? Infinity
+      });
+      if (buyCount <= 0) return;
+      const totalCost = totalCostForLevels(upgrade.cost, upgrade.scale, level, buyCount);
+      if (state.tier2.gears < totalCost) return;
+      state.tier2.gears -= totalCost;
+      state.tier2.upgrades[id] += buyCount;
+      saveGame();
+      refreshUI();
+    };
+
+    const buyTier4Upgrade = (id, overrideCount = null) => {
+      const upgrade = CONSTANTS.tier4Upgrades[id];
+      const level = state.tier4.upgrades[id];
+      const buyCount = overrideCount ?? getUpgradePurchaseCount({
+        currency: state.points,
+        baseCost: upgrade.cost,
+        scale: upgrade.scale,
+        level,
+        max: upgrade.max ?? Infinity
+      });
+      if (buyCount <= 0) return;
+      const totalCost = totalCostForLevels(upgrade.cost, upgrade.scale, level, buyCount);
+      if (state.points < totalCost) return;
+      state.points -= totalCost;
+      state.tier4.upgrades[id] += buyCount;
+      saveGame();
+      refreshUI();
+    };
+
+    const buyResearch = (id) => {
+      const node = CONSTANTS.research.nodes.find((entry) => entry.id === id);
+      if (!node) return;
+      const currentLevel = state.research.levels[id] || 0;
+      const maxLevel = node.maxLevel ?? 1;
+      if (currentLevel >= maxLevel) return;
+      const costScale = node.costScale ?? 1;
+      const essenceReq = (node.essenceReq ?? 0) * (currentLevel + 1);
+      const coreReq = (node.coreReq ?? 0) * (currentLevel + 1);
+      const prismReq = (node.prismReq ?? 0) * (currentLevel + 1);
+      const eclipseReq = (node.eclipseReq ?? 0) * (currentLevel + 1);
+      const crownReq = (node.crownReq ?? 0) * (currentLevel + 1);
+      const cost = node.cost * Math.pow(costScale, currentLevel);
+      if (state.research.data < cost) return;
+      if (state.essence < essenceReq || state.cores < coreReq || state.prisms < prismReq) return;
+      if (state.eclipses < eclipseReq || state.crowns < crownReq) return;
+      state.research.data -= cost;
+      state.research.levels[id] = currentLevel + 1;
+      saveGame();
+      refreshUI();
+    };
+
+    const buySanctumUpgrade = (id, overrideCount = null) => {
+      const upgrade = CONSTANTS.sanctum.upgrades[id];
+      const level = state.sanctum.upgrades[id];
+      const buyCount = overrideCount ?? getUpgradePurchaseCount({
+        currency: state.points,
+        baseCost: upgrade.cost,
+        scale: upgrade.scale,
+        level,
+        max: upgrade.max
+      });
+      if (buyCount <= 0) return;
+      const totalCost = totalCostForLevels(upgrade.cost, upgrade.scale, level, buyCount);
+      if (state.points < totalCost || level >= upgrade.max) return;
+      state.points -= totalCost;
+      state.sanctum.glyphs += totalCost * 0.001;
+      state.sanctum.upgrades[id] += buyCount;
+      saveGame();
+      refreshUI();
+    };
+
+    const buyConstellation = (id, overrideCount = null) => {
+      const node = CONSTANTS.constellations.nodes.find((entry) => entry.id === id);
+      if (!node) return;
+      const level = state.constellations.nodes[id] || 0;
+      const buyCount = overrideCount ?? getUpgradePurchaseCount(
+        {
+          currency: state.constellations.stars,
+          baseCost: node.cost,
+          scale: 1.8,
+          level,
+          max: node.max
+        },
+        state.buyMode
+      );
+      if (buyCount <= 0 || level >= node.max) return;
+      const totalCost = totalCostForLevels(node.cost, 1.8, level, buyCount);
+      if (state.constellations.stars < totalCost) return;
+      state.constellations.stars -= totalCost;
+      state.constellations.nodes[id] = level + buyCount;
+      saveGame();
+      refreshUI();
+    };
+
+    const buyAutomationUpgrade = (id) => {
+      const upgrade = CONSTANTS.automationUpgrades[id];
+      if (!upgrade) return;
+      const levelKey = `${id}Level`;
+      const enabledKey = `${id}Enabled`;
+      const level = state.automation[levelKey] || 0;
+      if (!hasPrestigeLevel(upgrade.unlockPrestige)) return;
+      const currencyAmount = getCurrencyAmount(upgrade.currency);
+      const buyCount = getUpgradePurchaseCount(
+        {
+          currency: currencyAmount,
+          baseCost: upgrade.baseCost,
+          scale: upgrade.scale,
+          level,
+          max: upgrade.max
+        },
+        state.buyMode
+      );
+      if (buyCount <= 0) return;
+      const totalCost = totalCostForLevels(upgrade.baseCost, upgrade.scale, level, buyCount);
+      if (currencyAmount < totalCost) return;
+      spendCurrency(upgrade.currency, totalCost);
+      state.automation[levelKey] = level + buyCount;
+      if (upgrade.max === 1 || upgrade.intervals) {
+        state.automation[enabledKey] = true;
+      }
+      saveGame();
+      refreshUI();
+    };
+
+    const buyPrestigeGenerator = (key) => {
+      const generator = CONSTANTS.prestigeGenerators[key];
+      if (!generator) return;
+      if (!hasPrestigeLevel(generator.unlockPrestige)) return;
+      const level = state.automation.generators[key] || 0;
+      const currencyAmount = getCurrencyAmount(generator.currency);
+      const buyCount = getUpgradePurchaseCount(
+        {
+          currency: currencyAmount,
+          baseCost: generator.baseCost,
+          scale: generator.scale,
+          level,
+          max: generator.max
+        },
+        state.buyMode
+      );
+      if (buyCount <= 0) return;
+      const totalCost = totalCostForLevels(generator.baseCost, generator.scale, level, buyCount);
+      if (currencyAmount < totalCost) return;
+      spendCurrency(generator.currency, totalCost);
+      state.automation.generators[key] = level + buyCount;
+      saveGame();
+      refreshUI();
+    };
+
+    const getAutomationInterval = (level, intervals) => {
+      if (!level || level <= 0) return null;
+      if (!intervals || intervals.length === 0) return null;
+      const index = Math.min(level - 1, intervals.length - 1);
+      return intervals[index];
+    };
+
+    const runAutomation = (now) => {
+      const t1Interval = getAutomationInterval(state.automation.t1UpgraderLevel, CONSTANTS.automationUpgrades.t1Upgrader.intervals);
+      if (state.automation.t1UpgraderEnabled && t1Interval !== null) {
+        if (t1Interval === 0 || now - state.automation.lastAuto.t1 >= t1Interval) {
+          state.automation.lastAuto.t1 = now;
+          const options = [
+            { id: "slot", cost: CONSTANTS.upgrades.slot.baseCost * Math.pow(CONSTANTS.upgrades.slot.scale, state.upgrades.slotsPurchased), maxed: state.upgrades.slotsPurchased >= CONSTANTS.upgrades.slot.max - 1 },
+            { id: "speed", cost: CONSTANTS.upgrades.speed.baseCost * Math.pow(CONSTANTS.upgrades.speed.scale, state.upgrades.speedLevel) },
+            { id: "shardEff", cost: CONSTANTS.upgrades.shardEff.baseCost * Math.pow(CONSTANTS.upgrades.shardEff.scale, state.upgrades.shardEffLevel) },
+            { id: "ingotPot", cost: CONSTANTS.upgrades.ingotPot.baseCost * Math.pow(CONSTANTS.upgrades.ingotPot.scale, state.upgrades.ingotPotLevel) },
+            { id: "relicPot", cost: CONSTANTS.upgrades.relicPot.baseCost * Math.pow(CONSTANTS.upgrades.relicPot.scale, state.upgrades.relicPotLevel) },
+            { id: "baseBoost", cost: 250 * Math.pow(2.4, state.upgrades.baseBoostLevel) },
+            { id: "multBoost", cost: 400 * Math.pow(2.6, state.upgrades.multBoostLevel) }
+          ].filter((item) => !item.maxed);
+          const affordable = options.filter((item) => state.points >= item.cost).sort((a, b) => a.cost - b.cost)[0];
+          if (affordable) {
+            buyUpgrade(affordable.id, 1);
+          }
+        }
+      }
+
+      if (state.automation.t1SlotterEnabled && state.automation.t1SlotterLevel > 0) {
+        if (now - state.automation.lastAuto.t1Slot >= 10000) {
+          state.automation.lastAuto.t1Slot = now;
+          const best = getBestRecipe();
+          state.slots.forEach((slot) => {
+            slot.recipe = best;
+          });
+          needsSlotRender = true;
+        }
+      }
+
+      const t2Interval = getAutomationInterval(state.automation.t2UpgraderLevel, CONSTANTS.automationUpgrades.t2Upgrader.intervals);
+      if (state.automation.t2UpgraderEnabled && t2Interval !== null) {
+        if (t2Interval === 0 || now - state.automation.lastAuto.t2 >= t2Interval) {
+          state.automation.lastAuto.t2 = now;
+          const options = Object.entries(CONSTANTS.tier2Upgrades)
+            .map(([id, upgrade]) => ({
+              id,
+              cost: upgrade.cost * Math.pow(upgrade.scale, state.tier2.upgrades[id]),
+              maxed: upgrade.max && state.tier2.upgrades[id] >= upgrade.max
+            }))
+            .filter((item) => !item.maxed);
+          const affordable = options.filter((item) => state.tier2.gears >= item.cost).sort((a, b) => a.cost - b.cost)[0];
+          if (affordable) {
+            buyTier2Upgrade(affordable.id, 1);
+          }
+        }
+      }
+
+      const t3Interval = getAutomationInterval(state.automation.t3UpgraderLevel, CONSTANTS.automationUpgrades.t3Upgrader.intervals);
+      if (state.automation.t3UpgraderEnabled && t3Interval !== null) {
+        if (t3Interval === 0 || now - state.automation.lastAuto.t3 >= t3Interval) {
+          state.automation.lastAuto.t3 = now;
+          const affordable = CONSTANTS.research.nodes
+            .map((node) => {
+              const level = state.research.levels[node.id] || 0;
+              if (level >= (node.maxLevel ?? 1)) return null;
+              const cost = node.cost * Math.pow(node.costScale ?? 1, level);
+              const essenceReq = (node.essenceReq ?? 0) * (level + 1);
+              const coreReq = (node.coreReq ?? 0) * (level + 1);
+              const prismReq = (node.prismReq ?? 0) * (level + 1);
+              const eclipseReq = (node.eclipseReq ?? 0) * (level + 1);
+              const crownReq = (node.crownReq ?? 0) * (level + 1);
+              if (state.research.data < cost) return null;
+              if (state.essence < essenceReq || state.cores < coreReq || state.prisms < prismReq) return null;
+              if (state.eclipses < eclipseReq || state.crowns < crownReq) return null;
+              return { id: node.id, cost };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.cost - b.cost)[0];
+          if (affordable) {
+            buyResearch(affordable.id);
+          }
+        }
+      }
+
+      const t4Interval = getAutomationInterval(state.automation.t4UpgraderLevel, CONSTANTS.automationUpgrades.t4Upgrader.intervals);
+      if (state.automation.t4UpgraderEnabled && t4Interval !== null) {
+        if (t4Interval === 0 || now - state.automation.lastAuto.t4 >= t4Interval) {
+          state.automation.lastAuto.t4 = now;
+          const options = Object.entries(CONSTANTS.tier4Upgrades)
+            .map(([id, upgrade]) => ({
+              id,
+              cost: upgrade.cost * Math.pow(upgrade.scale, state.tier4.upgrades[id]),
+              maxed: upgrade.max && state.tier4.upgrades[id] >= upgrade.max
+            }))
+            .filter((item) => !item.maxed);
+          const affordable = options.filter((item) => state.points >= item.cost).sort((a, b) => a.cost - b.cost)[0];
+          if (affordable) {
+            buyTier4Upgrade(affordable.id, 1);
+          }
+        }
+      }
+
+      const t5Interval = getAutomationInterval(state.automation.t5UpgraderLevel, CONSTANTS.automationUpgrades.t5Upgrader.intervals);
+      if (state.automation.t5UpgraderEnabled && t5Interval !== null) {
+        if (t5Interval === 0 || now - state.automation.lastAuto.t5 >= t5Interval) {
+          state.automation.lastAuto.t5 = now;
+          const options = Object.entries(CONSTANTS.sanctum.upgrades)
+            .map(([id, upgrade]) => ({
+              id,
+              cost: upgrade.cost * Math.pow(upgrade.scale, state.sanctum.upgrades[id]),
+              maxed: upgrade.max && state.sanctum.upgrades[id] >= upgrade.max
+            }))
+            .filter((item) => !item.maxed);
+          const affordable = options.filter((item) => state.points >= item.cost).sort((a, b) => a.cost - b.cost)[0];
+          if (affordable) {
+            buySanctumUpgrade(affordable.id, 1);
+          }
+        }
+      }
+
+      const t6Interval = getAutomationInterval(state.automation.t6UpgraderLevel, CONSTANTS.automationUpgrades.t6Upgrader.intervals);
+      if (state.automation.t6UpgraderEnabled && t6Interval !== null) {
+        if (t6Interval === 0 || now - state.automation.lastAuto.t6 >= t6Interval) {
+          state.automation.lastAuto.t6 = now;
+          const options = CONSTANTS.constellations.nodes
+            .map((node) => {
+              const level = state.constellations.nodes[node.id] || 0;
+              if (level >= node.max) return null;
+              const cost = node.cost * Math.pow(1.8, level);
+              return { id: node.id, cost };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.cost - b.cost)[0];
+          if (options && state.constellations.stars >= options.cost) {
+            buyConstellation(options.id, 1);
+          }
+        }
+      }
+    };
+
+    const getBestRecipe = () => {
+      const unlocked = getUnlockedRecipes();
+      let best = unlocked[0];
+      let bestScore = 0;
+      unlocked.forEach((key) => {
+        const item = CONSTANTS.baseItems[key];
+        const craftTime = getCraftTime(key);
+        let ppsGain = 0;
+        if (item.type === "base") {
+          let basePPS = (key === "shard" ? getShardPPS() : item.basePPS * getBaseBoostMult());
+          const tierBoost = Math.pow(1 + CONSTANTS.tier2Upgrades.tierBoost.effect, state.tier2.upgrades.tierBoost);
+          const sanctumForge = Math.pow(1 + CONSTANTS.sanctum.upgrades.relicForge.effect, state.sanctum.upgrades.relicForge);
+          if (item.tier >= 2) basePPS *= tierBoost;
+          if (item.tier >= 4) basePPS *= sanctumForge;
+          if (item.tier === 4) basePPS *= getTier4BaseBoost();
+          const multItem = Object.entries(CONSTANTS.baseItems).find(([, entry]) => entry.tier === item.tier && entry.type === "mult");
+          const multKey = multItem ? multItem[0] : null;
+          const bonus = multKey ? getMultBonus(multKey) : 0;
+          const count = multKey ? state.items[multKey] : 0;
+          const tierMult = Math.pow(1 + bonus, count);
+          ppsGain = basePPS * tierMult;
+        } else {
+          const baseItem = Object.entries(CONSTANTS.baseItems).find(([, entry]) => entry.tier === item.tier && entry.type === "base");
+          const baseKey = baseItem ? baseItem[0] : null;
+          let basePPS = baseKey === "shard" ? getShardPPS() : (baseKey ? CONSTANTS.baseItems[baseKey].basePPS * getBaseBoostMult() : 0);
+          const baseItemData = baseKey ? CONSTANTS.baseItems[baseKey] : null;
+          if (baseItemData) {
+            const tierBoost = Math.pow(1 + CONSTANTS.tier2Upgrades.tierBoost.effect, state.tier2.upgrades.tierBoost);
+            const sanctumForge = Math.pow(1 + CONSTANTS.sanctum.upgrades.relicForge.effect, state.sanctum.upgrades.relicForge);
+            if (baseItemData.tier >= 2) basePPS *= tierBoost;
+            if (baseItemData.tier >= 4) basePPS *= sanctumForge;
+            if (baseItemData.tier === 4) basePPS *= getTier4BaseBoost();
+          }
+          const baseCount = baseKey ? state.items[baseKey] : 0;
+          const bonus = getMultBonus(key);
+          const tierMult = baseCount > 0 ? Math.pow(1 + bonus, baseCount) : 0;
+          ppsGain = basePPS * tierMult * 0.1;
+        }
+        const score = ppsGain / craftTime;
+        if (score > bestScore) {
+          bestScore = score;
+          best = key;
+        }
+      });
+      return best;
+    };
+
+    const craftTick = (dt) => {
+      if (!Array.isArray(state.slots)) {
+        state.slots = [];
+      }
+      state.slots.forEach((slot) => {
+        const craftTime = getCraftTime(slot.recipe);
+        slot.progress += dt;
+        while (slot.progress >= craftTime) {
+          slot.progress -= craftTime;
+          state.items[slot.recipe] = (state.items[slot.recipe] || 0) + 1;
+        }
+      });
+    };
+
+    const dataTick = (dt, pps) => {
+      const dataRate = (state.research.slider / 100) * pps;
+      state.research.data += dataRate * dt;
+      state.totalData += dataRate * dt;
+      if (state.prestige5Count > 0) {
+        const starRate = dataRate * 0.08 * getResearchEffect("starGain", 1);
+        state.constellations.stars += starRate * dt;
+      }
+    };
+
+    const applyPrestigeGenerators = (dt) => {
+      const essenceLevel = state.automation.generators.essence || 0;
+      const coreLevel = state.automation.generators.cores || 0;
+      const prismLevel = state.automation.generators.prisms || 0;
+      const eclipseLevel = state.automation.generators.eclipses || 0;
+      const crownLevel = state.automation.generators.crowns || 0;
+      if (essenceLevel > 0) {
+        state.essence += calcEssenceGain() * (essenceLevel / 100) * dt;
+      }
+      if (coreLevel > 0) {
+        state.cores += calcCoreGain() * (coreLevel / 100) * dt;
+      }
+      if (prismLevel > 0) {
+        state.prisms += calcPrismGain() * (prismLevel / 100) * dt;
+      }
+      if (eclipseLevel > 0) {
+        state.eclipses += calcEclipseGain() * (eclipseLevel / 100) * dt;
+      }
+      if (crownLevel > 0) {
+        state.crowns += calcCrownGain() * (crownLevel / 100) * dt;
+      }
+    };
+
+    const tick = (dt) => {
+      const { pps, machineStats } = recalcPPS();
+      state.points += pps * dt;
+      state.totalPoints += pps * dt;
+      state.pointsThisRun += pps * dt;
+      state.lifetimePoints += pps * dt;
+      state.timeThisRun += dt;
+      state.tier2.gears += machineStats.gps * dt;
+      state.totalGears += machineStats.gps * dt;
+      const dustBoost = getResearchEffect("dustBoost", 1);
+      state.dust.essence += state.essence * CONSTANTS.dust.essenceRate * dustBoost * dt;
+      state.dust.core += state.cores * CONSTANTS.dust.coreRate * dustBoost * dt;
+      state.dust.prism += state.prisms * CONSTANTS.dust.prismRate * dustBoost * dt;
+      craftTick(dt);
+      dataTick(dt, pps);
+      applyPrestigeGenerators(dt);
+      runAutomation(performance.now());
+      state.lastPPS = pps;
+    };
+
+    const canPrestige1 = () => {
+      return state.items.relic >= CONSTANTS.prestige1.relics || state.totalPoints >= CONSTANTS.prestige1.totalPoints;
+    };
+
+    const calcEssenceGain = () => {
+      const pointsComponent = Math.floor(Math.pow(state.totalPoints / CONSTANTS.prestige1.essenceFormulaPoints, CONSTANTS.prestige1.essenceExponent));
+      const relicComponent = Math.floor(state.items.relic / CONSTANTS.prestige1.relicsPerEssence);
+      const dustBonus = Math.floor(state.dust.essence / 100);
+      const base = pointsComponent + relicComponent + dustBonus;
+      const boost = getResearchEffect("essenceBoost", 1);
+      return Math.max(1, Math.floor(base * boost));
+    };
+
+    const prestige1 = () => {
+      if (!canPrestige1()) return;
+      const gain = calcEssenceGain();
+      if (state.stats.bestPrestige1Time === null || state.timeThisRun / 60 < state.stats.bestPrestige1Time) {
+        state.stats.bestPrestige1Time = state.timeThisRun / 60;
+      }
+      state.essence += gain;
+      state.prestige1Count += 1;
+      const jumpstart = state.tier2.upgrades.jumpstart;
+      state.points = getResearchEffect("startingPoints", 0);
+      state.totalPoints = 0;
+      state.pointsThisRun = 0;
+      state.timeThisRun = 0;
+      state.totalData = 0;
+      state.research.data = 0;
+      state.dust = { essence: 0, core: 0, prism: 0 };
+      state.dust = { essence: 0, core: 0, prism: 0 };
+      state.items = {
+        shard: 0,
+        ingot: 0,
+        relic: 0,
+        rune: 0,
+        sigil: 0,
+        core: 0,
+        aether: 0,
+        myth: 0,
+        nova: 0,
+        flux: 0,
+        void: 0,
+        echo: 0
+      };
+      state.unlockedTier = Math.max(state.unlockedTier, 2);
+      syncRecipes();
+      state.upgrades = {
+        slotsPurchased: 0,
+        speedLevel: 0,
+        shardEffLevel: 0,
+        ingotPotLevel: 0,
+        relicPotLevel: 0,
+        baseBoostLevel: 0,
+        multBoostLevel: 0
+      };
+      state.tier4 = {
+        upgrades: { aetherBoost: 0, mythBoost: 0 }
+      };
+      state.slotCount = 1;
+      state.slots = [];
+      needsSlotRender = true;
+      needsUpgradeRender = true;
+      needsMachineRender = true;
+      needsTier2UpgradeRender = true;
+      needsResearchRender = true;
+      needsTier4UpgradeRender = true;
+      needsAutomationRender = true;
+      needsSanctumRender = true;
+      needsConstellationRender = true;
+      initSlots();
+      saveGame();
+      refreshUI();
+    };
+
+    const canPrestige2 = () => {
+      return state.totalGears >= CONSTANTS.prestige2.totalGears ||
+        state.tier2.machines.press >= CONSTANTS.prestige2.pressMachines ||
+        state.totalPoints >= CONSTANTS.prestige2.totalPoints;
+    };
+
+    const canPrestige3 = () => {
+      return state.totalData >= CONSTANTS.prestige3.totalData ||
+        state.totalPoints >= CONSTANTS.prestige3.totalPoints;
+    };
+
+    const canPrestige4 = () => {
+      return state.prisms >= CONSTANTS.prestige4.totalPrisms ||
+        state.totalPoints >= CONSTANTS.prestige4.totalPoints;
+    };
+
+    const canPrestige5 = () => {
+      return state.eclipses >= CONSTANTS.prestige5.totalEclipses ||
+        state.totalPoints >= CONSTANTS.prestige5.totalPoints;
+    };
+
+    const calcCoreGain = () => {
+      const gearComponent = Math.floor(Math.pow(state.totalGears / CONSTANTS.prestige2.coresFormulaGears, CONSTANTS.prestige2.coresExponent));
+      const essenceComponent = Math.floor(state.essence / CONSTANTS.prestige2.essencePerCore);
+      const dustBonus = Math.floor(state.dust.core / 150);
+      const base = gearComponent + essenceComponent + dustBonus;
+      const boost = getResearchEffect("coreBoost", 1);
+      return Math.max(1, Math.floor(base * boost));
+    };
+
+    const calcPrismGain = () => {
+      const dataComponent = Math.floor(Math.pow(state.totalData / CONSTANTS.prestige3.prismsFormulaData, CONSTANTS.prestige3.prismsExponent));
+      const coreComponent = Math.floor(state.cores / CONSTANTS.prestige3.coresPerPrism);
+      const dustBonus = Math.floor(state.dust.prism / 200);
+      const base = dataComponent + coreComponent + dustBonus;
+      return Math.max(1, base);
+    };
+
+    const calcEclipseGain = () => {
+      const prismComponent = Math.floor(Math.pow(state.prisms / CONSTANTS.prestige4.eclipsesFormulaPrisms, CONSTANTS.prestige4.eclipsesExponent));
+      const coreComponent = Math.floor(state.cores / CONSTANTS.prestige4.coresPerEclipse);
+      return Math.max(1, prismComponent + coreComponent);
+    };
+
+    const calcCrownGain = () => {
+      const eclipseComponent = Math.floor(Math.pow(state.eclipses / CONSTANTS.prestige5.crownsFormulaEclipses, CONSTANTS.prestige5.crownsExponent));
+      const prismComponent = Math.floor(state.prisms / CONSTANTS.prestige5.prismsPerCrown);
+      return Math.max(1, eclipseComponent + prismComponent);
+    };
+
+    const prestige2 = () => {
+      if (!canPrestige2()) return;
+      const gain = calcCoreGain();
+      if (state.stats.bestPrestige2Time === null || state.timeThisRun / 60 < state.stats.bestPrestige2Time) {
+        state.stats.bestPrestige2Time = state.timeThisRun / 60;
+      }
+      state.cores += gain;
+      state.prestige2Count += 1;
+      state.essence = 0;
+      state.tier2 = {
+        machines: { crank: 0, press: 0, foundry: 0 },
+        gears: 0,
+        upgrades: { overclock: 0, amplifier: 0, slotAutomation: 0, jumpstart: 0, tierBoost: 0 }
+      };
+      state.points = getResearchEffect("startingPoints", 0);
+      state.totalPoints = 0;
+      state.pointsThisRun = 0;
+      state.totalGears = 0;
+      state.timeThisRun = 0;
+      state.totalData = 0;
+      state.research.data = 0;
+      state.dust = { essence: 0, core: 0, prism: 0 };
+      state.dust = { essence: 0, core: 0, prism: 0 };
+      state.items = {
+        shard: 0,
+        ingot: 0,
+        relic: 0,
+        rune: 0,
+        sigil: 0,
+        core: 0,
+        aether: 0,
+        myth: 0,
+        nova: 0,
+        flux: 0,
+        void: 0,
+        echo: 0
+      };
+      state.unlockedTier = Math.max(state.unlockedTier, 3);
+      syncRecipes();
+      state.upgrades = {
+        slotsPurchased: 0,
+        speedLevel: 0,
+        shardEffLevel: 0,
+        ingotPotLevel: 0,
+        relicPotLevel: 0,
+        baseBoostLevel: 0,
+        multBoostLevel: 0
+      };
+      state.tier4 = {
+        upgrades: { aetherBoost: 0, mythBoost: 0 }
+      };
+      state.slotCount = 1;
+      state.slots = [];
+      needsSlotRender = true;
+      needsUpgradeRender = true;
+      needsMachineRender = true;
+      needsTier2UpgradeRender = true;
+      needsResearchRender = true;
+      needsTier4UpgradeRender = true;
+      needsAutomationRender = true;
+      needsSanctumRender = true;
+      needsConstellationRender = true;
+      initSlots();
+      saveGame();
+      refreshUI();
+    };
+
+    const prestige3 = () => {
+      if (!canPrestige3()) return;
+      const gain = calcPrismGain();
+      state.prisms += gain;
+      state.prestige3Count += 1;
+      state.essence = 0;
+      state.cores = 0;
+      state.tier2 = {
+        machines: { crank: 0, press: 0, foundry: 0 },
+        gears: 0,
+        upgrades: { overclock: 0, amplifier: 0, slotAutomation: 0, jumpstart: 0, tierBoost: 0 }
+      };
+      state.points = getResearchEffect("startingPoints", 0);
+      state.totalPoints = 0;
+      state.pointsThisRun = 0;
+      state.totalGears = 0;
+      state.totalData = 0;
+      state.timeThisRun = 0;
+      state.dust = { essence: 0, core: 0, prism: 0 };
+      state.dust = { essence: 0, core: 0, prism: 0 };
+      state.items = {
+        shard: 0,
+        ingot: 0,
+        relic: 0,
+        rune: 0,
+        sigil: 0,
+        core: 0,
+        aether: 0,
+        myth: 0,
+        nova: 0,
+        flux: 0,
+        void: 0,
+        echo: 0
+      };
+      state.recipes = {};
+      state.upgrades = {
+        slotsPurchased: 0,
+        speedLevel: 0,
+        shardEffLevel: 0,
+        ingotPotLevel: 0,
+        relicPotLevel: 0,
+        baseBoostLevel: 0,
+        multBoostLevel: 0
+      };
+      state.tier4 = {
+        upgrades: { aetherBoost: 0, mythBoost: 0 }
+      };
+      state.research.data = 0;
+      state.research.slider = 0;
+      state.slotCount = 1;
+      state.slots = [];
+      state.unlockedTier = Math.max(state.unlockedTier, 4);
+      syncRecipes();
+      needsSlotRender = true;
+      needsUpgradeRender = true;
+      needsMachineRender = true;
+      needsTier2UpgradeRender = true;
+      needsResearchRender = true;
+      needsTier4UpgradeRender = true;
+      needsAutomationRender = true;
+      needsSanctumRender = true;
+      needsConstellationRender = true;
+      initSlots();
+      saveGame();
+      refreshUI();
+    };
+
+    const prestige4 = () => {
+      if (!canPrestige4()) return;
+      const gain = calcEclipseGain();
+      state.eclipses += gain;
+      state.prestige4Count += 1;
+      state.prisms = 0;
+      state.cores = 0;
+      state.essence = 0;
+      state.tier2 = {
+        machines: { crank: 0, press: 0, foundry: 0 },
+        gears: 0,
+        upgrades: { overclock: 0, amplifier: 0, slotAutomation: 0, jumpstart: 0, tierBoost: 0 }
+      };
+      state.sanctum.glyphs = 0;
+      state.sanctum.upgrades = { glyphFocus: 0, relicForge: 0, timeSeals: 0 };
+      state.points = getResearchEffect("startingPoints", 0);
+      state.totalPoints = 0;
+      state.pointsThisRun = 0;
+      state.totalGears = 0;
+      state.totalData = 0;
+      state.timeThisRun = 0;
+      state.dust = { essence: 0, core: 0, prism: 0 };
+      state.dust = { essence: 0, core: 0, prism: 0 };
+      state.items = {
+        shard: 0,
+        ingot: 0,
+        relic: 0,
+        rune: 0,
+        sigil: 0,
+        core: 0,
+        aether: 0,
+        myth: 0,
+        nova: 0,
+        flux: 0,
+        void: 0,
+        echo: 0
+      };
+      state.upgrades = {
+        slotsPurchased: 0,
+        speedLevel: 0,
+        shardEffLevel: 0,
+        ingotPotLevel: 0,
+        relicPotLevel: 0,
+        baseBoostLevel: 0,
+        multBoostLevel: 0
+      };
+      state.research.data = 0;
+      state.research.slider = 0;
+      state.slotCount = 1;
+      state.slots = [];
+      state.tier4 = {
+        upgrades: { aetherBoost: 0, mythBoost: 0 }
+      };
+      state.unlockedTier = Math.max(state.unlockedTier, 5);
+      syncRecipes();
+      needsSlotRender = true;
+      needsUpgradeRender = true;
+      needsMachineRender = true;
+      needsTier2UpgradeRender = true;
+      needsResearchRender = true;
+      needsTier4UpgradeRender = true;
+      needsAutomationRender = true;
+      needsSanctumRender = true;
+      needsConstellationRender = true;
+      initSlots();
+      saveGame();
+      refreshUI();
+    };
+
+    const prestige5 = () => {
+      if (!canPrestige5()) return;
+      const gain = calcCrownGain();
+      state.crowns += gain;
+      state.prestige5Count += 1;
+      state.eclipses = 0;
+      state.prisms = 0;
+      state.cores = 0;
+      state.essence = 0;
+      state.tier2 = {
+        machines: { crank: 0, press: 0, foundry: 0 },
+        gears: 0,
+        upgrades: { overclock: 0, amplifier: 0, slotAutomation: 0, jumpstart: 0, tierBoost: 0 }
+      };
+      state.sanctum.glyphs = 0;
+      state.sanctum.upgrades = { glyphFocus: 0, relicForge: 0, timeSeals: 0 };
+      state.constellations.stars = 0;
+      state.constellations.nodes = { "star-1": 0, "star-2": 0, "star-3": 0 };
+      state.points = getResearchEffect("startingPoints", 0);
+      state.totalPoints = 0;
+      state.pointsThisRun = 0;
+      state.totalGears = 0;
+      state.totalData = 0;
+      state.timeThisRun = 0;
+      state.dust = { essence: 0, core: 0, prism: 0 };
+      state.dust = { essence: 0, core: 0, prism: 0 };
+      state.items = {
+        shard: 0,
+        ingot: 0,
+        relic: 0,
+        rune: 0,
+        sigil: 0,
+        core: 0,
+        aether: 0,
+        myth: 0,
+        nova: 0,
+        flux: 0,
+        void: 0,
+        echo: 0
+      };
+      state.upgrades = {
+        slotsPurchased: 0,
+        speedLevel: 0,
+        shardEffLevel: 0,
+        ingotPotLevel: 0,
+        relicPotLevel: 0,
+        baseBoostLevel: 0,
+        multBoostLevel: 0
+      };
+      state.research.data = 0;
+      state.research.slider = 0;
+      state.slotCount = 1;
+      state.slots = [];
+      state.tier4 = {
+        upgrades: { aetherBoost: 0, mythBoost: 0 }
+      };
+      state.unlockedTier = Math.max(state.unlockedTier, 6);
+      syncRecipes();
+      needsSlotRender = true;
+      needsUpgradeRender = true;
+      needsMachineRender = true;
+      needsTier2UpgradeRender = true;
+      needsResearchRender = true;
+      needsTier4UpgradeRender = true;
+      needsAutomationRender = true;
+      needsSanctumRender = true;
+      needsConstellationRender = true;
+      initSlots();
+      saveGame();
+      refreshUI();
+    };
+
+    const saveGame = () => {
+      state.lastSave = Date.now();
+      localStorage.setItem("idle-crafting-save", JSON.stringify(state));
+    };
+
+    const loadGame = () => {
+      const saved = localStorage.getItem("idle-crafting-save");
+      if (!saved) {
+        needsSlotRender = true;
+        needsUpgradeRender = true;
+        needsMachineRender = true;
+        needsTier2UpgradeRender = true;
+        needsResearchRender = true;
+        needsTier4UpgradeRender = true;
+        needsAutomationRender = true;
+        syncRecipes();
+        initSlots();
+        return;
+      }
+      try {
+        const parsed = JSON.parse(saved);
+        state = { ...defaultState(), ...parsed };
+        state.buyMode = ["1", "10", "100", "max"].includes(String(state.buyMode)) ? String(state.buyMode) : "1";
+        const computedTier = 1
+          + (state.prestige1Count > 0 ? 1 : 0)
+          + (state.prestige2Count > 0 ? 1 : 0)
+          + (state.prestige3Count > 0 ? 1 : 0)
+          + (state.prestige4Count > 0 ? 1 : 0)
+          + (state.prestige5Count > 0 ? 1 : 0);
+        state.unlockedTier = Math.max(state.unlockedTier || 1, computedTier);
+        state.items = { ...defaultState().items, ...parsed.items };
+        state.dust = { ...defaultState().dust, ...parsed.dust };
+        state.recipes = { ...defaultState().recipes, ...parsed.recipes };
+        state.upgrades = { ...defaultState().upgrades, ...parsed.upgrades };
+        state.points = sanitizeNumber(parsed.points);
+        state.totalPoints = sanitizeNumber(parsed.totalPoints);
+        state.pointsThisRun = sanitizeNumber(parsed.pointsThisRun);
+        state.lifetimePoints = sanitizeNumber(parsed.lifetimePoints);
+        state.totalGears = sanitizeNumber(parsed.totalGears);
+        state.totalData = sanitizeNumber(parsed.totalData);
+        state.lastPPS = sanitizeNumber(parsed.lastPPS);
+        state.essence = sanitizeNumber(parsed.essence);
+        state.cores = sanitizeNumber(parsed.cores);
+        state.prisms = sanitizeNumber(parsed.prisms);
+        state.eclipses = sanitizeNumber(parsed.eclipses);
+        state.crowns = sanitizeNumber(parsed.crowns);
+        const savedSlots = Array.isArray(parsed.slots) ? parsed.slots : [];
+        state.slots = savedSlots.map((slot) => ({
+          recipe: slot && CONSTANTS.baseItems[slot.recipe] ? slot.recipe : "shard",
+          progress: Number.isFinite(slot?.progress) ? slot.progress : 0
+        }));
+        const savedSlotCount = Number.isFinite(parsed.slotCount) ? parsed.slotCount : state.slots.length || 1;
+        state.slotCount = Math.max(1, savedSlotCount);
+        state.tier2 = {
+          ...defaultState().tier2,
+          ...parsed.tier2,
+          upgrades: { ...defaultState().tier2.upgrades, ...parsed.tier2?.upgrades },
+          machines: { ...defaultState().tier2.machines, ...parsed.tier2?.machines }
+        };
+        state.tier4 = {
+          ...defaultState().tier4,
+          ...parsed.tier4,
+          upgrades: { ...defaultState().tier4.upgrades, ...parsed.tier4?.upgrades }
+        };
+        state.sanctum = {
+          ...defaultState().sanctum,
+          ...parsed.sanctum,
+          upgrades: { ...defaultState().sanctum.upgrades, ...parsed.sanctum?.upgrades }
+        };
+        state.constellations = {
+        ...defaultState().constellations,
+        ...parsed.constellations,
+        nodes: { ...defaultState().constellations.nodes, ...parsed.constellations?.nodes }
+      };
+        state.automation = {
+        ...defaultState().automation,
+        ...parsed.automation,
+        generators: { ...defaultState().automation.generators, ...parsed.automation?.generators },
+        lastAuto: { ...defaultState().automation.lastAuto, ...parsed.automation?.lastAuto }
+      };
+        state.tier2.gears = sanitizeNumber(state.tier2.gears);
+        Object.keys(state.tier2.upgrades).forEach((key) => {
+          state.tier2.upgrades[key] = sanitizeNumber(state.tier2.upgrades[key]);
+        });
+        Object.keys(state.tier2.machines).forEach((key) => {
+          state.tier2.machines[key] = sanitizeNumber(state.tier2.machines[key]);
+        });
+        Object.keys(state.tier4.upgrades).forEach((key) => {
+          state.tier4.upgrades[key] = sanitizeNumber(state.tier4.upgrades[key]);
+        });
+        state.sanctum.glyphs = sanitizeNumber(state.sanctum.glyphs);
+        Object.keys(state.sanctum.upgrades).forEach((key) => {
+          state.sanctum.upgrades[key] = sanitizeNumber(state.sanctum.upgrades[key]);
+        });
+        state.constellations.stars = sanitizeNumber(state.constellations.stars);
+        Object.keys(state.constellations.nodes).forEach((key) => {
+          state.constellations.nodes[key] = sanitizeNumber(state.constellations.nodes[key]);
+        });
+        Object.keys(state.automation.generators).forEach((key) => {
+          state.automation.generators[key] = sanitizeNumber(state.automation.generators[key]);
+        });
+        ["t1UpgraderLevel", "t1SlotterLevel", "t2UpgraderLevel", "t3UpgraderLevel", "t4UpgraderLevel", "t5UpgraderLevel", "t6UpgraderLevel"].forEach((key) => {
+          state.automation[key] = sanitizeNumber(state.automation[key]);
+        });
+        const savedResearch = parsed.research || {};
+        const savedLevels = savedResearch.levels || {};
+        const legacyPurchased = savedResearch.purchased || {};
+        Object.entries(legacyPurchased).forEach(([nodeId, purchased]) => {
+          if (purchased && savedLevels[nodeId] === undefined) {
+            savedLevels[nodeId] = 1;
+          }
+        });
+        state.research = {
+          ...defaultState().research,
+          ...savedResearch,
+          levels: { ...defaultState().research.levels, ...savedLevels }
+        };
+        syncRecipes();
+        applyOfflineProgress(parsed.lastSave);
+        initSlots();
+      } catch (error) {
+        console.error("Failed to load save", error);
+        state = defaultState();
+        needsSlotRender = true;
+        needsUpgradeRender = true;
+        needsMachineRender = true;
+        needsTier2UpgradeRender = true;
+        needsResearchRender = true;
+        needsTier4UpgradeRender = true;
+        needsAutomationRender = true;
+        initSlots();
+      }
+    };
+
+    const applyOfflineProgress = (lastSaveTime) => {
+      if (!lastSaveTime) return;
+      const now = Date.now();
+      const timeAway = (now - lastSaveTime) / 1000;
+      const offlineCap = CONSTANTS.offlineCapSeconds + getResearchEffect("offlineCap", 0);
+      const effectiveTime = Math.min(timeAway, offlineCap) * 0.8;
+      const pps = state.lastPPS || recalcPPS().pps;
+      state.points += pps * effectiveTime;
+      state.totalPoints += pps * effectiveTime;
+      state.pointsThisRun += pps * effectiveTime;
+      state.lifetimePoints += pps * effectiveTime;
+      const dataRate = (state.research.slider / 100) * pps;
+      state.research.data += dataRate * effectiveTime;
+      state.totalData += dataRate * effectiveTime;
+      const dustBoost = getResearchEffect("dustBoost", 1);
+      state.dust.essence += state.essence * CONSTANTS.dust.essenceRate * dustBoost * effectiveTime;
+      state.dust.core += state.cores * CONSTANTS.dust.coreRate * dustBoost * effectiveTime;
+      state.dust.prism += state.prisms * CONSTANTS.dust.prismRate * dustBoost * effectiveTime;
+      if (state.prestige5Count > 0) {
+        state.constellations.stars += dataRate * effectiveTime * 0.08 * getResearchEffect("starGain", 1);
+      }
+      applyPrestigeGenerators(effectiveTime);
+      const machineStats = calcMachineStats();
+      state.tier2.gears += machineStats.gps * effectiveTime;
+      state.totalGears += machineStats.gps * effectiveTime;
+    };
+
+    const resetSave = () => {
+      if (!confirm("Reset all progress?")) return;
+      state = defaultState();
+      needsSlotRender = true;
+      needsUpgradeRender = true;
+      needsMachineRender = true;
+      needsTier2UpgradeRender = true;
+      needsResearchRender = true;
+      needsTier4UpgradeRender = true;
+      needsAutomationRender = true;
+      syncRecipes();
+      initSlots();
+      saveGame();
+      refreshUI();
+    };
+
+    const setupTabs = () => {
+      document.querySelectorAll("nav button[data-tab]").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll("nav button[data-tab]").forEach((btn) => btn.classList.remove("active"));
+          button.classList.add("active");
+          const tab = button.getAttribute("data-tab");
+          document.querySelectorAll("section > .panel").forEach((panel) => {
+            if (panel.id === `tab-${tab}`) {
+              panel.classList.remove("hidden");
+            } else if (!panel.id.includes("debug")) {
+              panel.classList.add("hidden");
+            }
+          });
+        });
+      });
+    };
+
+    const setupEvents = () => {
+      elements.prestige1.addEventListener("click", prestige1);
+      elements.prestige2.addEventListener("click", prestige2);
+      elements.prestige3.addEventListener("click", prestige3);
+      elements.prestige4.addEventListener("click", prestige4);
+      elements.prestige5.addEventListener("click", prestige5);
+
+      document.querySelectorAll(".buy-toggle button").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.buyMode = button.dataset.buy;
+          saveGame();
+          refreshUI();
+        });
+      });
+
+      document.getElementById("toggle-debug").addEventListener("click", () => {
+        elements.debugPanel.classList.toggle("hidden");
+        updateDebug();
+      });
+
+      document.getElementById("reset-save").addEventListener("click", resetSave);
+
+      elements.dataSlider.addEventListener("input", (event) => {
+        state.research.slider = Number(event.target.value);
+        saveGame();
+        updateDataUI();
+      });
+
+      const debugBoostButton = document.getElementById("debug-boost");
+      if (debugBoostButton) {
+        debugBoostButton.addEventListener("click", () => {
+          state.points = 1e9;
+          state.totalPoints = 1e9;
+          state.pointsThisRun = 1e9;
+          state.lifetimePoints = Math.max(state.lifetimePoints, 1e9);
+          state.essence = 1e9;
+          state.cores = 1e9;
+          state.prisms = 1e9;
+          state.eclipses = 1e9;
+          state.crowns = 1e9;
+          state.prestige1Count = Math.max(state.prestige1Count, 1);
+          state.prestige2Count = Math.max(state.prestige2Count, 1);
+          state.prestige3Count = Math.max(state.prestige3Count, 1);
+          state.prestige4Count = Math.max(state.prestige4Count, 1);
+          state.prestige5Count = Math.max(state.prestige5Count, 1);
+          state.unlockedTier = Math.max(state.unlockedTier, 6);
+          syncRecipes();
+          saveGame();
+          refreshUI();
+        });
+      }
+    };
+
+    const gameLoop = () => {
+      let last = performance.now();
+      const step = () => {
+        const now = performance.now();
+        const delta = (now - last) / 1000;
+        last = now;
+        tick(delta);
+        refreshUI();
+        requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
+
+    const autosave = () => {
+      saveGame();
+      setTimeout(autosave, 10000);
+    };
+
+    loadGame();
+    setupTabs();
+    setupEvents();
+    refreshUI();
+    gameLoop();
+    autosave();
+  </script>
+</body>
+</html>
